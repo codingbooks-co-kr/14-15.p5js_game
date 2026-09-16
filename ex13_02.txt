@@ -1,0 +1,59 @@
+// 2단계: 방향키로 플레이어를 회전, 이동하여 목표물 획득하면 목표물의 위치 랜덤 변경, 점수 상승, 플레이어의 이동속도 증가
+
+let targetX, targetY, playerX, playerY, targetSize = 30, playerSize = 30;
+let playerSpeed = 2, angle = 0, score = 0;
+
+function setup() {
+  createCanvas(600, 600);
+  targetX = random(targetSize, width-targetSize);	// 목표물의 초기 x축값 랜덤 변경
+  targetY = random(targetSize, height-targetSize);	// 목표물의 초기 y축값 랜덤 변경
+  playerX = width / 2;					// 플레이어의 초기 x축 좌표
+  playerY = height / 2;				// 플레이어의 초기 y축 좌표
+}
+
+function draw() {
+  background(0, 10);					// 페이딩 효과 (투명도 10 부여)
+  
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);				// 문자열 가운데 정렬
+  text('Score: ' + score, width/2, 30);			// 점수 표시
+
+  fill(255);
+  ellipse(targetX, targetY, targetSize, targetSize);	// 목표물 표시
+
+  push();					// [회전, 이동하는 플레이어 설정 시작]
+  translate(playerX, playerY);			// (playerX, playerY)로 좌표 이동
+  rotate(angle);					// angle만큼 좌표 회전
+  stroke(0, 255, 0);
+  strokeWeight(5);
+  line(0, 0, playerSize, 0);			// (플레이어) 선 그리기
+  noFill();
+  ellipse(0, 0, playerSize, playerSize);		// (플레이어) 원 그리기
+  pop();						// [회전, 이동하는 플레이어 설정 종료]
+
+  if (keyIsDown(LEFT_ARROW)) {		// 왼쪽 방향키를 누르면 좌회전
+    angle -= 0.05;				// 0.05라디안씩 감소
+  }
+  if (keyIsDown(RIGHT_ARROW)) {		// 오른쪽 방향키를 누르면 우회전
+    angle += 0.05;				// 0.05라디안씩 증가
+  }
+  if (keyIsDown(UP_ARROW)) {		// 위쪽 방향키를 누르면 (angle 방향) 전진
+    playerX += playerSpeed * cos(angle);
+    playerY += playerSpeed * sin(angle);
+  }
+  if (keyIsDown(DOWN_ARROW)) {		// 아래쪽 방향키를 누르면 (angle 방향) 후진
+    playerX -= playerSpeed * cos(angle);
+    playerY -= playerSpeed * sin(angle);
+  }
+  playerX = constrain(playerX, playerSize/2, width-playerSize/2);	// 좌우 이동 제한
+  playerY = constrain(playerY, playerSize/2, height-playerSize/2);	// 상하 이동 제한
+
+  let distance = dist(targetX, targetY, playerX, playerY);	// 목표물∼플레이어 거리
+  if (distance < (targetSize + playerSize) / 2) {		// 목표물과 플레이어 충돌
+    targetX = random(targetSize, width-targetSize);		// ❶목표물 x축값 랜덤변경
+    targetY = random(targetSize, height-targetSize);		// ❶목표물 y축값 랜덤변경
+    playerSpeed++;						// ❷플레이어 속도 증가
+    score++;							// ❸점수 상승
+  }
+}

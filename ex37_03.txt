@@ -1,0 +1,158 @@
+// 완성: 스페이스 키로 낙하하는 플레이어를 점프시키면서 장애물 통과, 장애물과 충돌할 때마다 생명력이 줄어들고 생명력이 다하면 게임 종료, ‘r’키를 눌러 재시작
+
+let burstSound, cosmosImg, burstImg, playerImg, player, obstacles;
+let x1, x2, interval, currentTime, endTime, topInterval, firstStep = true;
+
+function preload() {		// setup() 직전에 호출, 외부 파일의 로딩
+  burstSound = loadSound('data/burst.mp3');
+  cosmosImg = loadImage('data/cosmos.jpg');
+  burstImg = loadImage('data/burst.png');
+  playerImg = loadImage('data/rocket1.png');
+}
+
+function setup() {
+  createCanvas(600, 500);
+  reset();			// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  imageMode(CORNER);	// 이미지 정렬 모드: 이미지의 좌상단 모서리 기준 폭/높이 설정
+  image(cosmosImg, x1, 0, width, height); 	// 배경 이미지1 표시(→20.5절 참조)
+  image(cosmosImg, x2, 0, width, height); 	// 배경 이미지2 표시(→20.5절 참조)
+  x1 -= 5;					// 배경 이미지1 왼쪽으로 이동
+  x2 -= 5;					// 배경 이미지2 왼쪽으로 이동
+  if (x1 < -width) x1 = width;			// 이미지1: 캔버스를 벗어나면 x좌표 재설정
+  if (x2 < -width) x2 = width;			// 이미지2: 캔버스를 벗어나면 x좌표 재설정
+
+  noStroke();
+  fill(255, 0, 0);
+  rect(0, 0, player.life, 20);			// 플레이어의 생명력을 사각형 진행바로 표시
+
+  currentTime = millis() / 1000;		// 게임 시작 후의 경과시간(초) 측정
+  interval = currentTime - endTime; 		// 시간차(interval) = 현재시간 - 종료시간
+  if (interval > topInterval) topInterval = interval;	// 최장 주행시간 갱신
+
+  fill(255);
+  text('Driving Time: ' + nf(interval, 3, 1) + ' sec', width/2, 60);	// 주행시간
+  text('Top: ' + nf(topInterval, 3, 1) + ' sec', width/2, 100);		// 최장 주행시간
+
+  player.display();				// 플레이어 객체 표시
+  player.move();				// 플레이어 객체 이동
+  if (frameCount % 90 === 0) {		// 1.5초마다 장애물 추가
+    obstacles.push(new Obstacle()); 		// obstacles 배열 끝에 Obstacle 객체 추가
+  }
+
+  for (let i = obstacles.length-1; i >= 0; i--) {	// 역순 반복 처리: [참고20.1] 참조
+    obstacles[i].display();			// 장애물 객체 표시
+    obstacles[i].move();				// 장애물 객체 이동
+    if (player.hit(obstacles[i]) && player.life === 0) {	// 플레이어∼장애물 충돌, 생명력은 0
+      player.explode();				// 플레이어 폭발하는 효과 표시
+      fill(255);
+      text('GAME OVER', width/2, height/2);
+      noLoop();					// draw() 함수의 반복 실행 일시 정지
+    }
+    if (obstacles[i].offCanvas()) {		// 장애물이 캔버스에서 사라지면 배열에서 제거
+      obstacles.splice(i, 1); 			// 장애물 객체 obstacles[i] 삭제
+    }
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') player.jump();	// 스페이스 키를 누르면 점프
+  if (key === 'r') {			// 'r' 키를 누르면 게임 초기화
+    reset();				// 게임 종료 시: 게임 초기화
+    loop();				// draw() 함수의 무한 반복 실행
+  }
+}
+
+function reset() {			// 게임 초기화
+  x1 = 0;				// 배경 이미지1 x좌표 초기화
+  x2 = width;				// 배경 이미지2 x좌표 초기화
+  obstacles = [];			// 장애물: 빈 객체 배열로 초기화
+  obstacles.push(new Obstacle());	// obstacles 배열 끝에 Obstacle 객체 추가
+  player = new Player();		// 플레이어 객체 생성 및 초기화
+  frameCount = 0;			// 시스템변수(frameCount) 초기화
+
+  if (firstStep) {			// 첫 번째 실행 시
+    endTime = 0;			// 첫 시작만 종료시간(endTime)을 0으로 초기화
+    topInterval = 0;			// 최장 주행시간(topInterval) 0으로 초기화
+  } else {				// 두 번째 실행부터
+    endTime = millis() / 1000;		// 종료시간을 현재시간(초)으로 초기화
+  }
+  firstStep = false;
+
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+}
+
+class Obstacle {			// 장애물 클래스
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.x = width;			// 장애물 x축 좌표 초기화
+    this.w = 80;			// 장애물 y축 좌표 초기화
+    this.spacing = random(50, 150);			// 상·하단 장애물 간격 초기화(랜덤)
+    this.top = random(height/6, height*3/4);		// 상단 장애물 
+    this.bottom = height - (this.top + this.spacing);	// 하단 장애물 
+    this.speed = 5;					// 장애물 속도 초기화
+    this.isHit = false;					// 장애물 충돌 여부 초기화
+  }
+  display() {				// 메소드: 장애물 객체 표시
+    fill(255, 100);
+    if (this.isHit) fill(0, 255, 0);	// 충돌 시 장애물 색상 변경
+    rect(this.x, 0, this.w, this.top);				// 상단 사각형 장애물
+    rect(this.x, height-this.bottom, this.w, this.bottom);	// 하단 사각형 장애물
+  }
+  move() {				// 메소드: 장애물 객체 이동
+    this.x -= this.speed;		// 장애물 객체가 왼쪽 이동
+  }
+  offCanvas() {				// 메소드: 장애물이 왼쪽으로 완전히 사라졌는지 판단
+    if (this.x < -this.w) return true;	// 장애물이 캔버스의 왼쪽 경계를 벗어나면 true 반환
+    else return false;			// 장애물이 캔버스상에서 이동 중인 경우 false 반환
+  }
+}
+
+class Player {				// 플레이어 클래스 
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.x = 60;			// 플레이어 x축 좌표 초기화
+    this.y = height / 2;		// 플레이어 y축 좌표 초기화
+    this.size = 40;			// 플레이어 크기 초기화
+    this.speed = 0;			// 플레이어 속도 초기화
+    this.gravity = 0.2;			// 플레이어 중력가속도 초기화
+    this.jumpPower = -6;		// 플레이어 점프파워 초기화
+    this.life = width;			// 플레이어 생명력 초기화
+  }
+  display() {				// 메소드: 플레이어 객체 표시
+    imageMode(CENTER);		// 이미지 정렬 모드: 이미지의 가운데에서 폭/높이 설정
+    image(playerImg, this.x, this.y, this.size, this.size);	// 플레이어 이미지 표시
+  }
+  explode() {				// 메소드: 플레이어 객체 폭발 효과 표시
+    burstSound.play();			// 효과음 재생
+    imageMode(CENTER);		// 이미지 정렬 모드: 이미지의 가운데에서 폭/높이 설정
+    image(burstImg, this.x, this.y, this.size*2, this.size*2);	// 폭발 이미지 표시
+  }
+  jump() {				// 메소드: 플레이어 객체 점프
+    this.speed += this.jumpPower;	// 속도에 점프파워(–6) 누적 → 위쪽 점프
+  }
+  move() {				// 메소드: 플레이어 객체 이동
+    this.speed += this.gravity;		// y축 속도에 중력 누적 → y축 가속
+    this.y += this.speed;		// y축 속도 누적 → y축 가속 낙하
+    if (this.y > height-this.size/2) {	// 낙하 후 캔버스 최하단 경계에 닿은 경우
+      this.y = height - this.size/2;	// y축 좌표는 캔버스 바닥상에 위치
+      this.speed = 0;			// 속도에 중력가속도가 누적되지 않도록 0으로 초기화 
+    }
+    if (this.y < this.size/2) {		// 점프 후 캔버스 최상단 경계에 닿은 경우
+      this.y = this.size / 2;		// y축 좌표는 캔버스 최상단
+      this.speed = 0;			// 속도에 점프파워가 누적되지 않도록 0으로 초기화 
+    }
+  }
+  hit(other) {				// 메소드: 플레이어와 장애물(other)이 충돌했는지 판단
+    if (this.y < other.top || this.y > height - other.bottom) {	// 장애물 y축(상·하단) 충돌
+      if (this.x > other.x && this.x < other.x + other.w) {	// 장애물 x축 내부인 경우
+        this.life -= 10;			// 플레이어 생명력 감소
+        other.isHit = true;		// 장애물과 충돌한 경우: 장애물 색상 변경
+        return true;			// 장애물과 충돌한 경우: true 반환
+      }
+    }
+    other.isHit = false;			// 장애물과 충돌하지 않은 경우: 장애물 색상변경 없음
+    return false;			// 장애물과 충돌하지 않은 경우: false 반환
+  }
+}

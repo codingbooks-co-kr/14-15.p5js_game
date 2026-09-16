@@ -1,0 +1,190 @@
+// 완성: 마우스의 현재 위치 방향으로 플레이어가 따라오면서 목표물을 획득, 획득할수록 플레이어의 크기 증가, 적을 피해 모든 목표물을 획득하면 다음 단계로 이동, 목표물 및 적의 개수가 증가, 플레이어의 이동 범위가 넓어짐, 적과 충돌하면 게임 종료되며 스페이스 키를 누르면 재시작 
+
+let catchSound, burstSound, clapSound, burstImg, targetImg, enemyImg;
+let player, targets, enemies, targetNum, enemyNum, maxWidth, maxHeight;
+let gameOver, previousStage, stage = 1;
+
+function preload() {			// setup() 직전에 호출, 외부 파일의 로딩
+  catchSound = loadSound('data/catch.mp3');
+  burstSound = loadSound('data/burst.mp3');
+  clapSound = loadSound('data/claps.mp3');
+  burstImg = loadImage('data/burst.png');
+  targetImg = loadImage('data/circle1.png');
+  enemyImg = loadImage('data/enemy.png');
+}
+
+function setup() {
+  createCanvas(600, 600);
+  reset();				// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  background(0);
+
+  noStroke();
+  fill(255);
+  text('Stage: ' + stage + ', Num: ' + targets.length, width/2, 30);
+
+  push(); 				// [좌표 이동 설정 시작]
+  translate(width/2 - player.x, height/2 - player.y);		// 캔버스 좌표 이동
+
+  player.display();						// 플레이어 객체 표시
+  player.move(mouseX, mouseY, maxWidth, maxHeight);	// 플레이어 객체 이동
+  
+  for (let i = targets.length-1; i >= 0; i--) {	// 역순 반복 처리: [참고20.1] 참조
+    targets[i].display();			// 목표물 객체 표시
+    if (player.hit(targets[i])) {		// 플레이어∼목표물 충돌한 경우
+      targets[i].catchTarget();		// 목표물 폭발하는 효과 표시
+      targets.splice(i, 1); 		// targets[i]를 배열에서 삭제
+    }
+  }
+
+  for (let i = 0; i < enemies.length; i++) {
+    enemies[i].display();		// 적 객체 표시
+    enemies[i].move();			// 적 객체 이동
+    if (player.hit(enemies[i])) {		// 적과 충돌한 경우
+      player.explode();			// 폭발하는 효과 표시
+      gameOver = true;		// 게임 종료
+    }
+  }
+  pop(); 				// [좌표 이동 설정 종료]
+
+  if (gameOver) {			// 적과 충돌한 경우 → 게임 종료
+    fill(255);
+    noStroke();
+    text('GAME OVER', width/2, 200);
+
+    stage = 1;				// 1단계
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+
+  if (targets.length === 0) {		// 모든 목표물이 소멸된 경우 다음 단계로 이동
+    clapSound.play();			// 효과음 재생
+    fill(255);
+    noStroke();
+    text('YOU WIN', width/2, height/2 - 30);
+    text('Hit the space key to start next stage', width/2, height/2 + 30);
+
+    stage++;				// 단계 상승
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {			// 스페이스 키를 누르면 게임 초기화, 재실행
+    reset();				// 게임 종료 시: 게임 초기화
+    loop();				// draw() 함수의 무한 반복 실행
+  }
+}
+
+function reset() {			// 게임 초기화
+  if (stage === 1) {			// 1단계인 경우
+    targetNum = 50;			// 목표물 개수 초기화
+    enemyNum = 1;			// 적 개수 초기화
+    maxWidth = width;		// 실제 캔버스 폭 최대범위 초기화
+    maxHeight = height;		// 실제 캔버스 높이 최대범위 초기화
+  } else if (stage > 1 && stage !== previousStage) {		// 2단계 이상인 경우
+    targetNum += 20;			// 목표물 개수 증가
+    enemyNum++;			// 적 개수 증가
+    maxWidth += 100;			// 실제 캔버스 폭 증가
+    maxHeight += 100;		// 실제 캔버스 높이 증가
+    if (maxWidth > width*2) maxWidth = width * 2;		// 최대:캔버스 크기의 두배
+    if (maxHeight > height*2) maxHeight = height * 2;	// 최대:캔버스 크기의 두배
+  }
+  previousStage = stage;		// 2단계 이상에서 동일 단계는 한 번만 처리
+
+  gameOver = false;			// 게임종료 변수 초기화
+  player = new Player(maxWidth, maxHeight);		// 플레이어 객체 생성 및 초기화
+
+
+  targets = [];				// 목표물: 빈 객체 배열로 초기화
+  for (let i = 0; i < targetNum; i++) {
+    targets[i] = new Target(maxWidth, maxHeight);	// 목표물 객체 생성 및 초기화
+  }
+
+  enemies = [];			// 적: 빈 객체 배열로 초기화
+  for (let i = 0; i < enemyNum; i++) {
+    enemies[i] = new Enemy(maxWidth, maxHeight);	// 적 객체 생성 및 초기화
+  }
+
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  imageMode(CENTER);		// 이미지 정렬 모드: 이미지의 가운데에서 폭/높이 설정
+}
+
+class Target {				// 목표물 클래스
+  constructor(maxWidth, maxHeight) {	// 생성자: 속성 추가 및 초기화
+    this.x = random(maxWidth);	// 목표물 x축 좌표 초기화(랜덤)
+    this.y = random(maxHeight);	// 목표물 y축 좌표 초기화(랜덤)
+    this.size = 30;			// 목표물 크기 초기화
+  }
+  display() {				// 메소드: 목표물 객체 표시
+    image(targetImg, this.x, this.y, this.size, this.size);	// 목표물 이미지 표시
+  }
+  catchTarget() {			// 메소드: 목표물 폭발 효과
+    catchSound.play();			// 효과음 재생
+    image(burstImg, this.x, this.y, this.size*2, this.size*2);	// 폭발 이미지 표시
+  }
+}
+
+class Enemy {				// 적 클래스
+  constructor(maxWidth, maxHeight) {	// 생성자: 속성 추가 및 초기화
+    this.x = random(maxWidth);	// 적 x축 좌표 초기화(랜덤)
+    this.y = random(maxHeight);	// 적 y축 좌표 초기화(랜덤)
+    this.size = 30;			// 적 크기 초기화
+    this.speedX = random(-2, 2);	// 적 x축 속도 초기화(랜덤)
+    this.speedY = random(-2, 2);	// 적 y축 속도 초기화(랜덤)
+  }
+  display() {				// 메소드: 적 객체 표시
+    image(enemyImg, this.x, this.y, this.size, this.size);	// 적 이미지 표시
+  }
+  move() {				// 메소드: 적 객체 이동
+    this.x += this.speedX;   		// x축 속도 누적 → x축 거리 이동
+    this.y += this.speedY;   		// y축 속도 누적 → y축 거리 이동
+    if (this.x < this.size/2 || this.x > maxWidth - this.size/2) {	// x축경계반사조건
+      this.speedX *= -1;		// 속도의 방향 반전, 즉 반사
+    }
+    if (this.y < this.size/2 || this.y > maxHeight - this.size/2) {	// y축경계반사조건
+      this.speedY *= -1;		// 속도의 방향 반전, 즉 반사
+    }
+  }
+}
+
+class Player {				// 플레이어 클래스 
+  constructor(maxWidth, maxHeight) {	// 생성자: 속성 추가 및 초기화
+    this.x = maxWidth / 2;		// 플레이어 x축 좌표 초기화
+    this.y = maxHeight / 2;		// 플레이어 y축 좌표 초기화
+    this.size = 50;			// 플레이어 크기 초기화
+    this.speed = 3;			// 플레이어 속도 초기화
+  }
+  display() {				// 메소드: 플레이어 객체 표시
+    stroke(0, 255, 0);
+    strokeWeight(5);
+    noFill();
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+  explode() {				// 메소드: 플레이어 객체 폭발 효과 표시
+    burstSound.play();			// 효과음 재생
+    image(burstImg, this.x, this.y, this.size*2, this.size*2);	// 폭발 이미지 표시
+  }
+  move(x, y, maxWidth, maxHeight) {	// 메소드: 플레이어 객체는 마우스를 추적(→32.1절 참조)
+    let distance = dist(width/2, height/2, x, y);	   // 플레이어∼마우스 거리
+    let dx = (x - width/2) / distance;		// dx가 +이면 마우스가 오른쪽 위치(-:반대)
+    let dy = (y - height/2) / distance;	// dy가 +이면 마우스가 아래쪽 위치(-:반대)
+    dx *= this.speed;				// 플레이어 x축 속도 
+    dy *= this.speed;				// 플레이어 y축 속도 
+    this.x += dx;				// dx가 +이면 오른쪽 이동, -이면 왼쪽 이동
+    this.y += dy; 				// dy가 +이면 아래쪽 이동, -이면 위쪽 이동
+    this.x = constrain(this.x, 0, maxWidth);	// x축 이동 제한
+    this.y = constrain(this.y, 0, maxHeight);	// y축 이동 제한
+  }
+  hit(other) {						// 메소드: 두 객체의 충돌 여부 판단
+    let distance = dist(this.x, this.y, other.x, other.y);	// 두 객체의 거리 측정
+    if (distance < (this.size + other.size) / 2) {	// 두 객체의 충돌 시
+      this.size++;					// 플레이어 객체의 크기 증가
+      return true;
+    } else {						// 두 객체의 미충돌 시
+      return false;
+    }
+  }
+}

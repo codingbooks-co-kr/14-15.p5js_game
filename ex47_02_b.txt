@@ -1,0 +1,44 @@
+// p5.js: 마우스로 플레이어(라켓)를 좌우로 이동 시 1바이트 범위의 이동값(0∼255) 송신 
+// 9.1절 “마우스로 플레이어 좌우 이동” 참조
+
+let port = new p5.WebSerial();		// 시리얼 통신 객체 생성
+let playerX, playerY, w = 100, h = 20, value = 0;
+
+function setup() {
+  createCanvas(300, 200);
+  port.getPorts(); 			// 포트 사용 가능 여부 확인
+  port.on('noport', makePortButton); 	// 기존 선택한 포트가 없으면 makePortButton() 호출
+  port.on('portavailable', openPort); 	// 사용 가능한 포트가 있으면 openPort() 자동 호출
+  port.on('data', serialEvent); 		// 데이터 수신: ‘data’ 이벤트 발생→serialEvent() 호출
+}
+
+function draw() {
+  background(0);
+  playerX = constrain(mouseX, w/2, width-w/2);	// 플레이어의 x축 좌우 이동 제한
+  playerY = height - h;				// 플레이어의 y축 위치 고정
+
+  fill(0, 255, 0);
+  rectMode(CENTER);			// 사각형의 정가운데를 기준으로 폭과 높이 설정
+  rect(playerX, playerY, w, h);		// 직사각형 플레이어 표시
+}
+
+function serialEvent() {				// 콜백함수: 수신값이 있으면 자동 호출
+  let signal = port.read(); 			// 수신: 통신시작신호('A'), 통신제어신호('B')
+  let value = int(map(playerX, w/2, width-w/2, 0, 255));	// 1바이트(0∼255)로 변환
+  port.write(value);				// 송신: 마우스의 좌우 이동값(0∼255)
+}
+
+function makePortButton() {			// 콜백함수: 포트 첫연결 시 포트선택버튼 생성
+  let portButton = createButton('포트 선택'); 	// 버튼 생성
+  portButton.mousePressed(choosePort); 	// 버튼 누르면 choosePort() 자동 호출
+  function choosePort() {			// 콜백함수
+    port.requestPort(); 				// 시리얼 포트 선택창 오픈
+  }
+}
+
+function openPort() {				// 콜백함수: 포트 오픈
+  port.open().then(initiateSerial); 		// 포트를 오픈 후 initiateSerial() 자동 호출
+  function initiateSerial() {			// 콜백함수
+    console.log('포트 오픈');
+  }
+}

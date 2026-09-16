@@ -1,0 +1,37 @@
+// 1단계: 플레이어(→마우스로 이동)를 따라오는 적, 마우스를 누를 때마다 적의 추적/정지 토글 
+
+let enemyX, enemyY, playerX, playerY, enemySize = 30, playerSize = 30, moving = false;
+
+function setup() {
+  createCanvas(300, 300);
+  enemyX = width;			// 적의 x축 좌표 초기화
+  enemyY = height;			// 적의 y축 좌표 초기화
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+  
+  noStroke();				// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+  fill(255, 0, 0);
+  ellipse(enemyX, enemyY, enemySize, enemySize);			// 적 표시
+
+  playerX = constrain(mouseX, playerSize/2, width-playerSize/2);	// x축 이동 제한
+  playerY = constrain(mouseY, playerSize/2, height-playerSize/2);	// y축 이동 제한
+
+  fill(0, 255, 0);
+  ellipse(playerX, playerY, playerSize, playerSize);			// 플레이어 표시
+
+  if (moving) {				// moving값에 따라 적의 이동 또는 정지
+    let distance = dist(enemyX, enemyY, playerX, playerY);		// 적∼플레이어 거리
+    let dx = (playerX - enemyX) / distance;	// dx가 +이면 playerX가 오른쪽 위치(-:반대)
+    let dy = (playerY - enemyY) / distance;	// dy가 +이면 playerY가 아래쪽 위치(-:반대)
+    //console.log(dx, dy);		// dx, dy값(0.0∼1.0) 및 부호 확인
+
+    enemyX += dx;			// dx가 +이면 적은 오른쪽 이동, -이면 왼쪽 이동
+    enemyY += dy;			// dy가 +이면 적은 아래쪽 이동, -이면 위쪽 이동
+  }
+}
+
+function mousePressed() {		// 이벤트함수: 마우스를 누르면 한 번 실행
+  moving = !moving;			// moving은 true 또는 false를 교대로 저장
+}

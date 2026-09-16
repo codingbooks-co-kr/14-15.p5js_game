@@ -1,0 +1,63 @@
+// p5.js: 키보드 방향키로 플레이어를 상하좌우 이동할 때의 x축 및 y축 이동값(0∼255) 송신
+// 12.1절 “방향키로 플레이어 상하좌우 이동” 참조
+
+let port = new p5.WebSerial(); 	// 시리얼 통신 객체 생성
+let playerX, playerY, playerSize = 30, playerSpeed = 2;
+let value1 = 0, value2 = 0;		// 송신값
+
+function setup() {
+  createCanvas(300, 300);
+  playerX = width / 2;			// 플레이어 x좌표 초기화
+  playerY = height / 2;		// 플레이어 y좌표 초기화
+
+  port.getPorts(); 			// 포트 사용 가능 여부 확인
+  port.on('noport', makePortButton); 	// 기존 선택한 포트가 없으면 makePortButton() 호출
+  port.on('portavailable', openPort); 	// 사용 가능한 포트가 있으면 openPort() 자동 호출
+  port.on('data', serialEvent); 		// 데이터 수신: ‘data’ 이벤트 발생→serialEvent() 호출
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+
+  noStroke();
+  fill(value1, value2, 255);				// 플레이어 색상에 적용
+  ellipse(playerX, playerY, playerSize, playerSize);	// 플레이어 표시
+
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    playerX -= playerSpeed;		// x축 속도(-부호: 왼쪽) 누적 → 왼쪽 이동 
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    playerX += playerSpeed;		// x축 속도(+부호: 오른쪽) 누적 → 오른쪽 이동
+  }
+  if (keyIsDown(UP_ARROW)) {	// 위쪽 방향키를 누른 경우
+    playerY -= playerSpeed;		// y축 속도(-부호: 위쪽) 누적 → 위쪽 이동 
+  }
+  if (keyIsDown(DOWN_ARROW)) {	// 아래쪽 방향키를 누른 경우
+    playerY += playerSpeed;		// y축 속도(+부호: 아래쪽) 누적 → 아래쪽 이동 
+  }
+  playerX = constrain(playerX, playerSize/2, width-playerSize/2);	// 좌우 이동 제한
+  playerY = constrain(playerY, playerSize/2, height-playerSize/2);	// 상하 이동 제한
+
+  value1 = int(map(playerX, playerSize/2, width-playerSize/2, 0, 255));	// 0∼255
+  value2 = int(map(playerY, playerSize/2, height-playerSize/2, 0, 255));	// 0∼255
+}
+
+function serialEvent() {  			// 콜백함수: 수신값이 있으면 자동 호출
+  let signal = port.read(); 			// 수신: 통신시작신호('A'), 통신제어신호('B')
+  port.write(value1 + ' ' + value2 + '\n');	// 송신: 정수값 2개를 문자열로 묶어 전송
+}
+
+function makePortButton() {			// 콜백함수: 포트 첫연결 시 포트선택버튼 생성
+  let portButton = createButton('포트 선택'); 	// 버튼 생성
+  portButton.mousePressed(choosePort); 	// 버튼 누르면 choosePort() 자동 호출
+  function choosePort() {			// 콜백함수
+    port.requestPort(); 				// 시리얼 포트 선택창 오픈
+  }
+}
+
+function openPort() {				// 콜백함수: 포트 오픈
+  port.open().then(initiateSerial); 		// 포트를 오픈 후 initiateSerial() 자동 호출
+  function initiateSerial() {			// 콜백함수
+    console.log('포트 오픈');
+  }
+}

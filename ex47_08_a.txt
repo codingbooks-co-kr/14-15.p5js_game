@@ -1,0 +1,47 @@
+// 아두이노: 목표물획득여부값 및 게임종료여부값 수신 후 부저 및 LED 제어, 가변저항값 2개 송신
+
+#define VARIABLE_R1 A1		// 가변저항1 핀번호: A1
+#define VARIABLE_R2 A2		// 가변저항2 핀번호: A2
+#define BUZZER 13			// 부저 핀번호: 13
+#define LED 6				// LED 핀번호: 6
+
+void setup() {
+  pinMode(VARIABLE_R1, INPUT);	// 가변저항핀1을 입력으로 사용
+  pinMode(VARIABLE_R2, INPUT);	// 가변저항핀2를 입력으로 사용
+  pinMode(BUZZER, OUTPUT);		// 부저핀을 출력으로 사용
+  pinMode(LED, OUTPUT);		// LED핀을 출력으로 사용
+  Serial.begin(9600);			// 전송속도: 9,600bps
+  while (Serial.available() == 0) {	// 수신버퍼에 수신값이 없는 동안 반복 실행
+    Serial.println('A');			// 시작신호('A') 전송(→'A'+개행문자 전송)
+    delay(300);				// 0.3초 대기
+  }
+}
+
+void loop() { }
+
+void serialEvent() {			// 이벤트함수: 수신값이 있으면 자동 호출
+  int catchSound = Serial.readStringUntil(',').toInt();	// 수신1: 목표물획득여부(0, 1)
+  int gameOver = Serial.readStringUntil('\n').toInt();	// 수신2: 게임종료여부(0, 1)
+
+  if (catchSound == 1) {		// 목표물 획득 시 부저 ON
+    tone(BUZZER, 440, 100);		// 440Hz음을 100msec동안 출력
+    delay(100);				// (유의: 100msec동안 게임 동작이 지연됨)
+  } else {				// 목표물 미획득 시 부저 OFF
+    noTone(BUZZER);			// 무음
+  }
+  if (gameOver == 1) { 		// 게임 종료 시 LED 점멸 및 부저 ON/OFF
+    digitalWrite(LED, 1);		// LED 점등
+    tone(BUZZER, 220, 200);		// 220Hz음을 200msec동안 출력
+    delay(200);				// (게임종료이므로 딜레이시간은 게임진행에 영향 없음)
+    digitalWrite(LED, 0);		// LED 소등
+    tone(BUZZER, 440, 200);		// 440Hz음을 200msec동안 출력
+    delay(200);				// (게임종료이므로 딜레이시간은 게임진행에 영향 없음)
+  } else {				// 게임 중
+    digitalWrite(LED, 0);		// LED 소등
+  }
+  int value1 = analogRead(VARIABLE_R1);	// 10비트의 가변저항1 값 읽기
+  int value2 = analogRead(VARIABLE_R2);	// 10비트의 가변저항2 값 읽기
+  Serial.print(value1);				// 첫 번째 가변저항값
+  Serial.print(",");				// 가변저항값 사이를 구분하는 콤마(,)
+  Serial.println(value2);				// 송신 최종문자열: “value1,value2\n“
+}

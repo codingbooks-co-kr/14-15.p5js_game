@@ -1,0 +1,16 @@
+// 좌우 반사하는 원
+
+let x = 0, speed = 1;
+
+function setup() {
+  createCanvas(300, 300);
+}
+
+function draw() {
+  background(0);
+  ellipse(x, height/2, 30, 30);
+  x += speed;			// x축 속도(부호: 방향성) 누적 → x축 거리 이동
+  if (x < 0 || x > width) {		// 좌우 반사 조건
+    speed *= -1;			// 속도의 방향 반전, 즉 반사 (speed = 1 또는 –1)
+  }
+}

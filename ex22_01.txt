@@ -1,0 +1,31 @@
+// 1단계: 키보드 방향키로 플레이어 상하좌우 이동 (객체 리터럴 사용)
+
+let player;
+
+function setup() {
+  createCanvas(300, 300);
+  player = { x: width/2, y: height/2, size: 30, speed: 3 };	  // 플레이어 객체 초기화
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+
+  noStroke();				// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+  fill(0, 255, 0);
+  ellipse(player.x, player.y, player.size, player.size);		  // 플레이어 객체 표시
+
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    player.x -= player.speed;		// x축 속도(-부호: 왼쪽) 누적 → 왼쪽 이동 
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    player.x += player.speed;		// x축 속도(+부호: 오른쪽) 누적 → 오른쪽 이동 
+  }
+  if (keyIsDown(UP_ARROW)) {	// 위쪽 방향키를 누른 경우
+    player.y -= player.speed;		// y축 속도(-부호: 위쪽) 누적 → 위쪽 이동 
+  }
+  if (keyIsDown(DOWN_ARROW)) {	// 아래쪽 방향키를 누른 경우
+    player.y += player.speed;		// y축 속도(+부호: 아래쪽) 누적 → 아래쪽 이동 
+  }
+  player.x = constrain(player.x, 0, width);	// 플레이어 좌우 이동 제한
+  player.y = constrain(player.y, 0, height);	// 플레이어 상하 이동 제한
+}

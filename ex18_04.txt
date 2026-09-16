@@ -1,0 +1,51 @@
+// 4단계: 이모지별 주사위 누적값이 가장 큰 이모지가 승리
+
+let dice = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];		// 주사위 유니코드 문자 배열
+let w1 = 10, w2 = 10, index1 = 0, index2 = 0, stop = false, finishLine;
+
+function setup() {
+  createCanvas(600, 250);
+  finishLine = width - 50;			// 결승선 위치
+}
+
+function draw() {
+  background(0);
+
+  stroke(255);
+  line(finishLine, 0, finishLine, height);		// 결승선 표시
+
+  noStroke();
+  fill(255);
+  textAlign(CENTER, CENTER);			// 문자열 가운데 정렬
+
+  textSize(50);
+  text('🐷', w1, 60);				// 이모지: 
+  text('🐱', w2, 160);				// 이모지: 
+
+  textSize(30);
+  text('PLAYER: ' + dice[index1] + '*10 += ' + w1, width/2, 50);
+  text('ENEMY: ' + dice[index2] + '*10 += ' + w2, width/2, 150);
+
+  if (stop) {					// 결승선에 도착한 경우
+    fill(0, 255, 0);
+    textSize(50);
+    if (w1 === w2) {				// 동시에 결승선에 도착한 경우
+      text('Tie', width/2, height/2);
+    } else if (w1 > w2) {			// PLAYER가 먼저 결승선에 도착한 경우
+      text('PLAYER WIN', width/2, height/2);
+    } else if (w1 < w2) {			// ENEMY가 먼저 결승선에 도착한 경우
+      text('ENEMY WIN', width/2, height/2);
+    }
+    noLoop(); 					// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function mousePressed() {			// 이벤트함수: 마우스를 누르면 한 번 실행
+  index1 = int(random(dice.length));		// 주사위1 배열 인덱스(0∼5) 랜덤 선택
+  index2 = int(random(dice.length));		// 주사위2 배열 인덱스(0∼5) 랜덤 선택
+  w1 += (index1 + 1) * 10;			// 누적폭1: w1 += (1∼6) * 10 = 10∼60
+  w2 += (index2 + 1) * 10;			// 누적폭2: w2 += (1∼6) * 10 = 10∼60
+  if (w1 >= finishLine || w2 >= finishLine) {	// PLAYER 또는 ENEMY가 결승선에 도착
+    stop = true;
+  }
+}

@@ -1,0 +1,22 @@
+// 랜덤하지만 방향성을 가진 1000개의 작은 원
+
+let num = 1000;
+let x = [], y = [];
+
+function setup() {
+  createCanvas(300, 300);
+  for (let i = 0; i < num; i++) {	// 배열요소의 초기값 설정
+    x[i] = random(width);		// x축 좌표 초기 위치 랜덤 설정
+    y[i] = random(height);		// y축 좌표 초기 위치 랜덤 설정
+  }
+}
+
+function draw() {
+  background(0, 10);		// 페이딩 효과 (투명도 10 부여)
+  noStroke();			// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+  for (let i = 0; i < num; i++) {
+    ellipse(x[i], y[i], 2, 2);	// 작은 원 표시
+    x[i] += random(1); 	// x축 좌표 랜덤값(0.0∼1.0) 누적, 방향성: 오른쪽
+    y[i] += random(1); 	// y축 좌표 랜덤값(0.0∼1.0) 누적, 방향성: 아래쪽
+  }
+}

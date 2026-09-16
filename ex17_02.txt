@@ -1,0 +1,56 @@
+// 2단계: 목표물을 획득할수록 점수 및 적의 추적 속도 증가 (마우스로 플레이어 이동)
+
+let targetX, targetY, enemyX, enemyY, playerX, playerY;
+let targetSize = 30, enemySize = 30, playerSize = 30, enemySpeed = 1, score = 0;
+
+function setup() {
+  createCanvas(600, 600);
+  targetX = random(targetSize, width-targetSize);	// 목표물의 x축 좌표 초기화(랜덤)
+  targetY = random(targetSize, height-targetSize);	// 목표물의 y축 좌표 초기화(랜덤)
+  enemyX = width;					// 적의 x축 좌표 초기화
+  enemyY = height;					// 적의 y축 좌표 초기화
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+  
+  noStroke();				// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  text('Score: ' + score, width/2, 30);					// 점수 표시
+
+  fill(255);
+  ellipse(targetX, targetY, targetSize, targetSize);			// 목표물 표시
+
+  fill(255, 0, 0);
+  ellipse(enemyX, enemyY, enemySize, enemySize);			// 적 표시
+
+  playerX = constrain(mouseX, playerSize/2, width-playerSize/2);	// x축 이동 제한
+  playerY = constrain(mouseY, playerSize/2, height-playerSize/2);	// y축 이동 제한
+
+  fill(0, 255, 0);
+  ellipse(playerX, playerY, playerSize, playerSize);			// 플레이어 표시
+
+  let distance = dist(enemyX, enemyY, playerX, playerY);		// 적∼플레이어 거리
+  if (distance < (enemySize + playerSize) / 2) {			// 적∼플레이어 충돌
+    fill(255);
+    text('GAME OVER', width/2, height/2);
+    noLoop();					// draw() 함수의 반복 실행 일시 정지
+  }
+
+  let dx = (playerX - enemyX) / distance;	// dx가 +이면 playerX가 오른쪽 위치(-:반대)
+  let dy = (playerY - enemyY) / distance;	// dy가 +이면 playerY가 아래쪽 위치(-:반대)
+  dx *= enemySpeed;				// dx 속도 증가
+  dy *= enemySpeed;				// dy 속도 증가
+  enemyX += dx;				// dx가 +이면 오른쪽 이동, -이면 왼쪽 이동
+  enemyY += dy;				// dy가 +이면 아래쪽 이동, -이면 위쪽 이동
+
+  distance = dist(targetX, targetY, playerX, playerY);	// 목표물∼플레이어 거리
+  if (distance < (targetSize + playerSize) / 2) {	// 목표물과 플레이어 충돌
+    targetX = random(targetSize, width-targetSize);	// 목표물의 x축 좌표 랜덤 변경
+    targetY = random(targetSize, height-targetSize);	// 목표물의 y축 좌표 랜덤 변경
+    enemySpeed += 0.3;			// 적의 속도 증가
+    score++;					// 점수 증가
+  }
+}

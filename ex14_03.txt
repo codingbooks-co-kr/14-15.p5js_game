@@ -1,0 +1,59 @@
+// 3단계: 접근하는 장애물을 뛰어넘으면 점수 상승, 충돌하면 게임 종료
+
+let obstacleX, obstacleY, playerX, playerY, obstacleSize = 50, playerSize = 50, score = 0;
+let obstacleSpeed = 5, playerSpeed = 0, gravity = 0.6, jumpPower = -10, jump = false;
+
+function setup() {
+  createCanvas(600, 300);
+  obstacleX = width;				// 장애물 x축 좌표 초기화
+  obstacleY = height - obstacleSize/2;	// 장애물 y축 좌표 초기화
+  playerX = 50;				// 플레이어 x축 좌표 초기화
+  playerY = height - playerSize/2;		// 플레이어 y축 좌표 초기화
+}
+
+function draw() {
+  background(0);
+  
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);			// 문자열 가운데 정렬
+  text('점수 : ' + score, width/2, 30);		// 점수 표시
+
+  fill(255, 0, 0);
+  ellipseMode(CENTER);
+  ellipse(obstacleX, obstacleY, obstacleSize, obstacleSize); 	// 장애물 표시
+  
+  fill(0, 255, 0);
+  ellipse(playerX, playerY, playerSize, playerSize);		// 플레이어 표시
+  
+  playerSpeed += gravity;			// 속도에 중력 누적 → 낙하 시 가속
+  playerY += playerSpeed;			// y축 속도 누적 → y축 거리 이동
+
+  if (playerY > height - playerSize/2) {  	// 플레이어가 캔버스 바닥에 닿은 경우
+    playerY = height - playerSize/2;		// 플레이어를 캔버스 바닥에 위치시킴
+    playerSpeed = 0;				// 속도는 지속 증가하므로 0으로 초기화
+    jump = false;				// 플레이어가 바닥에 있을 때 점프 가능
+  }
+
+  obstacleX -= obstacleSpeed;			// 장애물이 왼쪽으로 이동
+  if (obstacleX + obstacleSize/2 < 0) {		// 장애물이 왼쪽으로 사라지는 경우
+    obstacleX = width;				// 장애물이 오른쪽 끝에서 시작
+    score++;					// 점수 증가
+  }
+
+  let distance = dist(obstacleX, obstacleY, playerX, playerY);	// 장애물∼플레이어 거리
+  if (distance < (obstacleSize + playerSize) / 2) {		// 장애물∼플레이어 충돌
+    fill(255);
+    textSize(30);
+    textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+    text('GAME OVER', width/2, height/2);	// 게임 종료 표시
+    noLoop();					// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ' && !jump) {		// 스페이스키를 누르고 플레이어가 바닥에 있을 때
+    playerSpeed = jumpPower;		// 점프속도는 –10, 즉 윗방향으로 점프
+    jump = true;			// 플레이어가 점프한 상태에서는 재점프 불가능
+  }
+}

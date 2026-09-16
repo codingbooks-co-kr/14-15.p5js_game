@@ -1,0 +1,73 @@
+// [본문 코드] 1초마다 색상이 랜덤하게 바뀌는 다섯 개의 원형 객체
+
+let c = [];				// (객체) 변수 선언 및 빈 배열 생성
+let timer;				// (객체) 변수 선언
+
+function setup() {
+  createCanvas(300, 300);
+  let col = color(random(255), random(255), random(255));	// RGB 랜덤 색상값 저장
+  for (let i = 0; i < 5; i++) { 		// 배열요소 추가 및 요소별 객체 생성, 초기화
+    c[i] = new Circle(col, random(width), random(height), random(10, 50), random(-3, 3), random(-3, 3));
+  }
+  timer = new Timer(1000);		// timer 객체의 생성 및 초기화
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+  for (let i = 0; i < c.length; i++) { 
+    c[i].display();			// 메소드 호출: 원형 객체의 그리기 동작
+    c[i].move();				// 메소드 호출: 원형 객체의 상하좌우 반사 동작
+  }
+  if (timer.check()) {			// 메소드 호출: 설정시간(=1000msec) 되었는지 확인
+    timer.start();			// 메소드 호출: 시간 측정 시작
+    for (let i = 0; i < c.length; i++) {
+      c[i].change();			// 메소드 호출: 원형 객체의 색상 랜덤 변경
+    }
+  }
+}
+
+// [클래스 코드]
+
+class Circle {				// 원형 클래스 코드
+  constructor(c, x, y, d, speedX, speedY) {	// 생성자: 속성 추가 및 초기화
+    this.c = c;				// 속성: 색상 초기화
+    this.x = x;				// 속성: x축 위치좌표 초기화
+    this.y = y;				// 속성: y축 위치좌표 초기화
+    this.d = d;				// 속성: 크기 초기화
+    this.speedX = speedX;		// 속성: x축 속도 초기화
+    this.speedY = speedY;		// 속성: y축 속도 초기화
+  }
+  display() {				// 메소드: 그리기 동작
+    noStroke();				// 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(this.c);
+    ellipse(this.x, this.y, this.d, this.d);
+  }
+  move() {				// 메소드: 좌우 이동 및 반사 동작
+    this.x += this.speedX;   		// x축 속도 누적 → x축 거리 이동 (부호: 방향성)
+    this.y += this.speedY;   		// y축 속도 누적 → y축 거리 이동 (부호: 방향성)
+    if (this.x < 0 || this.x > width) {	// 캔버스의 좌우 경계에서 충돌하는 경우
+      this.speedX *= -1;		// 속도의 방향 반전, 즉 반사
+    }
+    if (this.y < 0 || this.y > height) {	// 캔버스의 상하 경계에서 충돌하는 경우
+      this.speedY *= -1;		// 속도의 방향 반전, 즉 반사
+    }
+  }
+  change() {				// 메소드: 색상 랜덤 변경
+    this.c = color(random(255), random(255), random(255));	// RGB 랜덤 색상값 저장
+  }
+}
+
+class Timer {				// 타이머 클래스 코드
+  constructor(time) {			// 생성자: 속성 추가 및 초기화
+    this.time = time;			// 속성: 설정시간 초기화
+    this.previous_time = 0;		// 속성: 이전시간 초기화
+  }
+  start() {				// 메소드: 시간 측정 시작
+    this.previous_time = millis();	// 이전시간을 현재시간으로 초기화
+  }
+  check() { 				// 메소드: 설정시간이 되었는지 여부 반환
+    let interval = millis() - this.previous_time;		// 시간차 = 현재시간 - 이전시간
+    if (interval > this.time) return true;			// 설정시간이 되면 true 반환
+    else return false;					// 설정시간이 되기 전 false 반환
+  }
+}

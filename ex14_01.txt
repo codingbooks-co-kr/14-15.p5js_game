@@ -1,0 +1,23 @@
+// 1단계: 오른쪽→왼쪽을 향해 끊임없이 이동하는 장애물
+
+let obstacleX, obstacleY, obstacleSize = 50;
+
+function setup() {
+  createCanvas(600, 200);
+  obstacleX = width;				// 장애물 x축 좌표 초기화
+  obstacleY = height - obstacleSize/2;	// 장애물 y축 좌표 초기화
+}
+
+function draw() {
+  background(0, 10);		// 페이딩 효과 (투명도 10 부여)
+  
+  noStroke();			// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+  fill(255, 0, 0);
+  ellipseMode(CENTER);
+  ellipse(obstacleX, obstacleY, obstacleSize, obstacleSize); 	// 장애물 표시
+
+  obstacleX -= 5;				// 장애물이 왼쪽으로 이동
+  if (obstacleX + obstacleSize/2 < 0) {		// 장애물 왼쪽으로 사라지면 오른쪽에서 재생성
+    obstacleX = width;				// 장애물이 오른쪽 끝에서 시작
+  }
+}

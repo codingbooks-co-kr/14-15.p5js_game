@@ -1,0 +1,45 @@
+// 2단계: 캔버스 상단의 랜덤 높이에서 랜덤 타이밍에 목표물이 생성된 후 왼쪽으로 이동
+
+let targets = [];
+
+function setup() {
+  createCanvas(700, 300);
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+
+  if (random(1) < 0.02) {		// 매 프레임 2%의 확률로 목표물 객체 생성 
+    let target = new Target();		// 목표물 객체 생성 및 초기화
+    targets.push(target);		// targets 배열 끝에 target 객체 추가
+  }
+
+  for (let i = targets.length-1; i >= 0; i--) {		// 역순 반복 처리: [참고20.1] 참조
+    targets[i].display();			// 목표물 객체 표시
+    targets[i].move();			// 목표물 객체 이동
+    if (targets[i].offCanvas()) {		// 목표물이 캔버스에서 사라지면 배열에서 제거
+      targets.splice(i, 1);  		// targets[i]를 배열에서 삭제
+    }
+  }
+}
+
+class Target {				// 목표물 클래스
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.x = width;			// 목표물 x좌표 초기화
+    this.y = random(50, 150);		// 목표물 y좌표 초기화(랜덤)
+    this.size = 30;			// 목표물 크기 초기화
+    this.speed = 5;			// 목표물 속도 초기화
+  }
+  display() {				// 메소드: 목표물 객체 표시
+    noStroke();				// 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(255);
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+  move() {				// 메소드: 목표물 객체 이동
+    this.x -= this.speed;		// 목표물이 왼쪽으로 이동
+  }
+  offCanvas() {				// 메소드: 목표물이 왼쪽으로 완전히 사라졌는지 판단
+    if (this.x < -this.size) return true;	// 목표물이 캔버스의 왼쪽 경계를 벗어나면 true 반환
+    else return false;			// 목표물이 캔버스상에서 이동 중인 경우 false 반환
+  }
+}

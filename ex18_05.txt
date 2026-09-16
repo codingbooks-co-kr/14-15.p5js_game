@@ -1,0 +1,76 @@
+// 완성: 이모지별 주사위 누적 거리값이 가장 큰 이모지가 승리, ‘r’키 눌러 재시작
+
+let runners = ['🐵', '🐱', '🐯', '🐷', '🐪', '🐘'];	// 
+let dice = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];		// 주사위 유니코드 문자 배열
+let startSound, finishSound, cosmosImg, start, stop, finishLine, index, distance;
+
+function preload() {				// setup() 직전에 호출, 외부 파일의 로딩
+  startSound = loadSound('data/burst.mp3');
+  finishSound = loadSound('data/catch.mp3');
+  cosmosImg = loadImage('data/cosmos.jpg');
+}
+
+function setup() {
+  createCanvas(600, 500);
+  reset(); 					// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  image(cosmosImg, 0, 0, width, height);	// 배경 이미지 표시
+
+  stroke(255);
+  line(finishLine, 0, finishLine, height);		// 결승선 표시
+
+  noStroke();
+  fill(255);
+  textSize(50);
+  textAlign(CENTER, CENTER);			// 문자열 가운데 정렬
+  for (let i = 0; i < runners.length; i++) {
+    text(runners[i] + dice[index[i]], distance[i], i*80+50);	// 이모지와 주사위 표시
+  }
+
+  if (stop) {					// 결승선에 도착한 경우 1등 주자 찾기
+    finishSound.play();				// 효과음 재생
+    distance[0] += random(1);			// distance[0]에 작은값(0.0∼1.0)을 더함
+    let top = distance[0];			// distance[0]값을 top으로 설정
+    let topIndex = 0;
+    for (let i = 1; i < runners.length; i++) {	// distance[1]∼distance[5] 순차 처리
+      distance[i] += random(1);		// 거리값 요소별로 작은값(0.0∼1.0)을 더함
+      if (distance[i] > top) {			// 1등 주자 찾아 top과 topIndex 갱신
+        top = distance[i];
+        topIndex = i;
+      }
+    }
+    text(runners[topIndex] + ': WINNER', width/2, height/2);		// 1등 주자 표시
+
+    for (let i = 0; i < runners.length; i++) {
+      console.log(runners[i], distance[i]);	// 이모지별 최종 거리값 확인
+    }
+    noLoop(); 					// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function keyPressed() {				// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === 'r') {				// 'r' 키를 누르면 게임 초기화
+    reset(); 					// 게임 종료 시: 게임 초기화
+    loop(); 					// draw() 함수의 무한 반복 실행
+  } else if (key === ' ') {			// 스페이스 키를 누를 때마다 달린 거리 누적
+    start++;
+    if (start === 1) startSound.play();		// 게임의 첫 시작에서만 출발음 재생
+    for (let i = 0; i < runners.length; i++) {
+      index[i] = int(random(dice.length));	// 주사위 배열 인덱스(0∼5) 랜덤 선택
+      distance[i] += (index[i] + 1) * 10;	// distance[i] += (1∼6) * 10 = 10∼60
+      if (distance[i] >= finishLine) {		// 결승선 도착하면 stop값은 true
+        stop = true;
+      }
+    }
+  }
+}
+
+function reset() {
+  index = [0, 0, 0, 0, 0, 0];			// runners의 dice 인덱스 배열
+  distance = [10, 10, 10, 10, 10, 10];		// runners의 거리값 누적 배열
+  start = 0;
+  stop = false;
+  finishLine = width - 50;
+}

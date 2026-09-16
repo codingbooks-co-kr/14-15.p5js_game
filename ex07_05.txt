@@ -1,0 +1,38 @@
+// 마우스 및 키보드의 이벤트함수
+
+let s = '';				// 변수의 선언 및 “빈 문자열”로 초기화
+
+function setup() {
+  createCanvas(600, 200);
+}
+
+function draw() {
+  background(0);
+  fill(255);
+  textSize(30);
+  text(s, 10, height/2);
+}
+
+function mousePressed() {		// 마우스를 누를 때 한 번 호출
+  s = 'mousePressed x: ' + mouseX + ' y: ' + mouseY;
+}
+
+function mouseReleased() {		// 마우스를 뗄 때 한 번 호출
+  s = 'mouseReleased x: ' + mouseX + ' y: ' + mouseY;
+}
+
+function mouseMoved() {		// 마우스를 움직일 때마다 호출
+  s = 'mouseMoved x: ' + mouseX + ' y: ' + mouseY;
+}
+
+function mouseDragged() {		// 마우스를 드래그할 때마다 호출
+  s = 'mouseDragged x: ' + mouseX + ' y: ' + mouseY;
+}
+
+function keyPressed() {		// 임의의 키를 누를 때 한 번 호출
+  s = 'keyPressed key: ' + key + ' keyCode: ' + keyCode;
+}
+
+function keyReleased() {		// 임의의 키를 뗄 때 한 번 호출
+  s = 'keyReleased key: ' + key + ' keyCode: ' + keyCode;
+}

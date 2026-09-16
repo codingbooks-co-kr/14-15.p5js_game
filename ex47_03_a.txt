@@ -1,0 +1,27 @@
+// 아두이노: 수신값 2개를 RGB LED의 Red 및 Green에 적용
+
+#define RedLED 11			// RedLED 핀번호: 11
+#define GreenLED 5			// GreenLED 핀번호: 5
+#define BlueLED 3			// BlueLED 핀번호: 3
+
+void setup() {
+  pinMode(RedLED, OUTPUT);		// RedLED핀을 출력으로 사용
+  pinMode(GreenLED, OUTPUT);	// GreenLED핀을 출력으로 사용
+  pinMode(BlueLED, OUTPUT);		// BlueLED핀을 출력으로 사용
+  Serial.begin(9600);			// 전송속도: 9,600bps
+  while (Serial.available() == 0) {	// 수신버퍼에 수신값이 없는 동안 반복 실행
+    Serial.write('A');			// 시작신호('A') 전송
+    delay(300);				// 0.3초 대기
+  }
+}
+
+void loop() { }
+
+void serialEvent() {				// 이벤트함수: 수신값이 있으면 자동 호출
+  int r = Serial.readStringUntil(' ').toInt();	// 수신: 첫 공백까지의 문자열→정수 변환
+  int g = Serial.readStringUntil('\n').toInt();	// 수신: 공백∼개행사이의 문자열→정수 변환
+  analogWrite(RedLED, r);			// Red색은 수신값 r에 따라 변화
+  analogWrite(GreenLED, g);			// Green은 수신값 g에 따라 변화
+  analogWrite(BlueLED, 255);			// Blue색은 255
+  Serial.write('B');        			// 송신: 통신제어신호('B')
+}

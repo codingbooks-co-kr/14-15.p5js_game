@@ -1,0 +1,28 @@
+// 2단계: 볼 상하좌우 반사
+
+let ballX, ballY, speedX, speedY, ballSize = 30;
+
+function setup() {
+  createCanvas(300, 200);
+  ballX = random(ballSize/2, width-ballSize/2);		// 볼의 x축 좌표 초기화(랜덤)
+  ballY = ballSize / 2;					// 볼의 y축 좌표 초기화
+  speedX = random(2, 5);				// 볼의 x축 속도 초기화(랜덤)
+  speedY = random(2, 5);				// 볼의 y축 속도 초기화(랜덤)
+}
+
+function draw() {
+  background(0, 10);		// 페이딩 효과 (투명도 10 부여)
+
+  noStroke();			// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+  fill(255);
+  ellipse(ballX, ballY, ballSize, ballSize);		// 볼 표시
+  
+  ballX += speedX;    	// x축 속도(부호: 방향성) 누적 → x축 거리 이동 
+  ballY += speedY;   		// y축 속도(부호: 방향성) 누적 → y축 거리 이동 
+  if (ballX < ballSize/2 || ballX > width-ballSize/2) {		// x축 경계에서 반사조건
+    speedX *= -1;		// 볼 x축 속도의 방향 반전, 즉 반사
+  }
+  if (ballY < ballSize/2 || ballY > height-ballSize/2) {		// y축 경계에서 반사조건
+    speedY *= -1;		// 볼 y축 속도의 방향 반전, 즉 반사
+  }
+}

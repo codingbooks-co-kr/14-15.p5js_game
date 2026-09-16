@@ -1,0 +1,91 @@
+// 2단계: 마우스의 현재 위치 방향으로 플레이어가 이동하면서 랜덤 위치에 생성된 목표물 획득
+
+let player, targets = [], maxWidth = 1200, maxHeight = 1200;
+
+function setup() {
+  createCanvas(600, 600);
+  player = new Player(maxWidth, maxHeight);		// 플레이어 객체 생성 및 초기화
+  for (let i = 0; i < 300; i++) {
+    targets[i] = new Target(maxWidth, maxHeight);	// 목표물 객체 생성 및 초기화
+  }
+}
+
+function draw() {
+  background(0);
+  noStroke();
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  text('x: ' + int(player.x) + ' y: ' + int(player.y) + ' Num: ' + targets.length, width/2, 30);
+
+  push();				// [좌표 이동 설정 시작]
+  translate(width/2 - player.x, height/2 - player.y);		// 캔버스 좌표 이동
+  player.display();			// 플레이어 객체 표시
+  player.move(mouseX, mouseY, maxWidth, maxHeight);	// 플레이어 객체 이동
+  
+  for (let i = targets.length-1; i >= 0; i--) {	// 역순 반복 처리: [참고20.1] 참조
+    targets[i].display();			// 목표물 객체 표시
+    if (player.hit(targets[i])) {		// 플레이어∼목표물 충돌한 경우
+      targets.splice(i, 1); 		// targets[i]를 배열에서 삭제
+    }
+  }
+  pop();					// [좌표 이동 설정 종료]
+
+  if (targets.length === 0) {		// 모든 목표물이 소멸된 경우
+    fill(255);
+    noStroke();
+    textSize(30);
+    textAlign(CENTER, CENTER);	// 문자열 가운데 정렬
+    text('YOU WIN', width/2, height/2);
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+class Target {				// 목표물 클래스
+  constructor(maxWidth, maxHeight) {	// 생성자: 속성 추가 및 초기화
+    this.x = random(maxWidth);	// 목표물 x축 좌표 초기화(랜덤)
+    this.y = random(maxHeight);	// 목표물 y축 좌표 초기화(랜덤)
+    this.size = 30;			// 목표물 크기 초기화
+  }
+  display() {				// 목표물 객체 표시
+    stroke(255);
+    strokeWeight(5);
+    noFill();
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+}
+
+class Player {				// 플레이어 클래스 
+  constructor(maxWidth, maxHeight) {	// 생성자: 속성 추가 및 초기화
+    this.x = maxWidth / 2;		// 플레이어 x축 좌표 초기화
+    this.y = maxHeight / 2;		// 플레이어 y축 좌표 초기화
+    this.size = 50;			// 플레이어 크기 초기화
+    this.speed = 3;			// 플레이어 속도 초기화
+  }
+  display() {				// 플레이어 객체 표시
+    stroke(0, 255, 0);
+    strokeWeight(5);
+    noFill();
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+  move(x, y, maxWidth, maxHeight) {	// 메소드: 플레이어 객체는 마우스를 추적(→32.1절 참조)
+    let distance = dist(width/2, height/2, x, y);	   // 플레이어∼마우스 거리
+    let dx = (x - width/2) / distance;		// dx가 +이면 마우스가 오른쪽 위치(-:반대)
+    let dy = (y - height/2) / distance;	// dy가 +이면 마우스가 아래쪽 위치(-:반대)
+    dx *= this.speed;			// 플레이어 x축 속도 
+    dy *= this.speed;			// 플레이어 y축 속도 
+    this.x += dx;			// dx가 +이면 오른쪽 이동, -이면 왼쪽 이동
+    this.y += dy; 			// dy가 +이면 아래쪽 이동, -이면 위쪽 이동
+    this.x = constrain(this.x, 0, maxWidth);		// x축 이동 제한
+    this.y = constrain(this.y, 0, maxHeight);		// y축 이동 제한
+  }
+  hit(other) {						// 두 객체의 충돌 여부 판단
+    let distance = dist(this.x, this.y, other.x, other.y);	// 두 객체의 거리 측정
+    if (distance < (this.size + other.size) / 2) {	// 두 객체의 충돌 시
+      this.size++;					// 플레이어 객체의 크기 증가
+      return true;
+    } else {						// 두 객체의 미충돌 시
+      return false;
+    }
+  }
+}

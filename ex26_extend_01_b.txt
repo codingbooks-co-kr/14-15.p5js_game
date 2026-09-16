@@ -1,0 +1,42 @@
+// 다섯 개의 원형 객체 좌우 반사 (클래스에 기반한 객체 배열 사용) 
+
+let c = [];				// 변수 선언 및 빈 배열 생성
+
+function setup() {
+  createCanvas(300, 300);
+  for (let i = 0; i < 5; i++) {		// 다섯 개의 원형 객체 생성 및 초기화
+    let col = color(random(255), random(255), random(255));	// 랜덤 색상값 저장
+    c[i] = new Circle(col, random(width), random(height), random(20, 60), random(-3, 3));
+  }
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+  for (let i = 0; i < c.length; i++) { 
+    c[i].display();			// 메소드 호출: 원 그리기 동작
+    c[i].move();				// 메소드 호출: 원 좌우 반사 동작
+  }
+}
+
+// [클래스 코드]
+
+class Circle {				// 원형 클래스
+  constructor(c, x, y, d, speed) {	// 생성자: 속성 추가 및 초기화
+    this.c = c;				// 속성: 색상 초기화
+    this.x = x;				// 속성: x축 위치좌표 초기화
+    this.y = y;				// 속성: y축 위치좌표 초기화
+    this.d = d;				// 속성: 크기 초기화
+    this.speed = speed;		// 속성: 속도 초기화
+  }
+  display() {				// 메소드: 원 그리기 동작
+    noStroke();				// 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(this.c);
+    ellipse(this.x, this.y, this.d, this.d);
+  }
+  move() {				// 메소드: 원 좌우 이동 및 반사 동작
+    this.x += this.speed;		// x축 속도누적 → x축 거리이동 (부호:방향성)
+    if (this.x < 0 || this.x > width) {	// 캔버스의 좌우 경계에서 충돌하는 경우
+      this.speed *= -1;		// 속도의 방향 반전, 즉 반사
+    }
+  }
+}

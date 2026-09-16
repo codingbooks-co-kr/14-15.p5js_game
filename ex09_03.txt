@@ -1,0 +1,42 @@
+// 3단계: 낙하하는 목표물 잡기, 놓치면 게임 종료
+
+let playerX, playerY, w = 100, h = 20;
+let targetX, targetY, targetSize = 30, targetSpeed = 2, score = 0;
+
+function setup() {
+  createCanvas(600, 400);
+  targetX = random(targetSize/2, width-targetSize/2);		// 목표물 x축 좌표 초기화
+  targetY = 0;							// 목표물 y축 좌표 초기화
+}
+
+function draw() {
+  background(0);
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);				// 문자열 가운데 정렬
+  text('Score: ' + score, width/2, 30);			// 점수 표시
+  
+  fill(255);
+  ellipse(targetX, targetY, targetSize, targetSize);	// 목표물 표시
+  
+  playerX = constrain(mouseX, w/2, width-w/2);	// 플레이어의 x축 좌우 이동 제한
+  playerY = height - h;				// 플레이어의 y축 위치 고정
+
+  fill(0, 255, 0);
+  rectMode(CENTER);			// 사각형의 정가운데를 기준으로 폭과 높이 설정
+  rect(playerX, playerY, w, h);		// 플레이어 표시
+  
+  targetY += targetSpeed;		// y축 속도 누적 → y축 낙하
+  if (targetX > playerX-w/2 && targetX < playerX+w/2 && targetY > playerY) {
+    targetX = random(targetSize/2, width-targetSize/2);	// 목표물 x축 좌표 초기화
+    targetY = 0;						// 목표물 y축 좌표 초기화
+    targetSpeed++;			// 낙하 속도 증가 
+    score++;				// 점수 증가
+  }
+  
+  if (targetY > height) {		// 목표물이 캔버스 바닥을 벗어나면 게임 종료
+    fill(255);
+    text('GAME OVER', width/2, height/2);
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}

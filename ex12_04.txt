@@ -1,0 +1,54 @@
+// 4단계: 방향키로 플레이어를 이동하여 목표물을 잡으면 랜덤 위치로 변경되고 점수 상승, 플레이어의 이동 시 가속도와 마찰율 적용
+
+let targetX, targetY, playerX, playerY, targetSize = 30, playerSize = 30;
+let speedX = 0, speedY = 0, friction = 0.98, score = 0;
+
+function setup() {
+  createCanvas(500, 500);
+  targetX = random(targetSize/2, width-targetSize/2);		// 목표물 x좌표 초기화(랜덤)
+  targetY = random(targetSize/2, height-targetSize/2);		// 목표물 y좌표 초기화(랜덤)
+  playerX = width / 2;			// 플레이어 x좌표 초기화
+  playerY = height / 2;		// 플레이어 y좌표 초기화
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+  
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);				// 문자열 가운데 정렬
+  text('Score: ' + score, width/2, 30);			// 점수 표시
+
+  fill(255);
+  ellipse(targetX, targetY, targetSize, targetSize);	// 목표물 표시
+
+  noStroke();
+  fill(0, 255, 0);
+  ellipse(playerX, playerY, playerSize, playerSize);	// 플레이어 표시
+
+  if (keyIsDown(LEFT_ARROW)) {			// 아래쪽 방향키를 누른 경우
+    speedX--;
+  }
+  if (keyIsDown(RIGHT_ARROW)) {		// 오른쪽 방향키를 누른 경우
+    speedX++;
+  }
+  if (keyIsDown(UP_ARROW)) {		// 위쪽 방향키를 누른 경우
+    speedY--;
+  }
+  if (keyIsDown(DOWN_ARROW)) {		// 아래쪽 방향키를 누른 경우
+    speedY++;
+  }
+  speedX *= friction;		// x축 속도에 마찰율 누적 → x축 속도 감소
+  speedY *= friction;		// y축 속도에 마찰율 누적 → y축 속도 감소
+  playerX += speedX;  	// x축 속도(부호: 방향성) 누적 → x축 거리 이동
+  playerY += speedY;  	// y축 속도(부호: 방향성) 누적 → y축 거리 이동
+  playerX = constrain(playerX, playerSize/2, width-playerSize/2);	// 좌우 이동 제한
+  playerY = constrain(playerY, playerSize/2, height-playerSize/2);	// 상하 이동 제한
+
+  let distance = dist(targetX, targetY, playerX, playerY);	// 목표물∼플레이어 거리
+  if (distance < (targetSize + playerSize) / 2) {		// 목표물∼플레이어 충돌
+    targetX = random(targetSize/2, width-targetSize/2);	// 목표물 x좌표 초기화(랜덤)
+    targetY = random(targetSize/2, height-targetSize/2);	// 목표물 y좌표 초기화(랜덤)
+    score++;							// 점수 증가
+  }
+}

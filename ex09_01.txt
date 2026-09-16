@@ -1,0 +1,17 @@
+// 1단계: 마우스로 사각형 플레이어를 좌우 이동
+
+let playerX, playerY, w = 100, h = 20;
+
+function setup() {
+  createCanvas(300, 200);
+}
+
+function draw() {
+  background(0);
+  playerX = constrain(mouseX, w/2, width-w/2);	// 플레이어의 x축 좌우 이동 제한
+  playerY = height - h;				// 플레이어의 y축 위치 고정
+
+  fill(0, 255, 0);
+  rectMode(CENTER);			// 사각형의 정가운데를 기준으로 폭과 높이 설정
+  rect(playerX, playerY, w, h);		// 사각형 플레이어 표시
+}

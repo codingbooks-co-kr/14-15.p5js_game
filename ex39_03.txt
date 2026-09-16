@@ -1,0 +1,99 @@
+// 완성: 마우스로 36개의 격자(grid) 각각을 눌러 하트가 나오면 계속 진행하고 폭탄이 나오면 게임 종료, 스페이스 키를 누르면 재시작
+
+let burstSound, heartImg, bombImg, cols, rows, grid, gridSize;
+
+function preload() {		// setup() 직전에 호출, 외부 파일의 로딩
+  burstSound = loadSound('data/burst.mp3');
+  heartImg = loadImage('data/heart.png');
+  bombImg = loadImage('data/bomb.png');
+}
+
+function setup() {
+  createCanvas(600, 600);
+  reset();			// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  background(200);
+  for (let y = 0; y < rows; y++) {		// 세로축(행) 
+    for (let x = 0; x < cols; x++) {		// 가로축(열) 
+      grid[y][x].display();			// 격자 객체(사각형) 표시
+      if (grid[y][x].revealed) {			// 격자의 내용 열기
+        if (grid[y][x].bomb) {			// 폭탄인 경우
+          burstSound.play();			// 효과음 재생
+          grid[y][x].hiddenDisplay(bombImg);	// 폭탄 이미지 표시
+          console.log('GAME OVER');
+          noLoop();				// draw() 함수의 반복 실행 일시 정지
+        } else {				// 폭탄이 아닌 경우
+          grid[y][x].hiddenDisplay(heartImg);	// 하트 이미지 표시
+        }
+      }
+    }
+  }
+}
+
+// 캔버스 크기 또는 격자(grid) 크기 변경 시 더블클릭함으로써 캔버스의 빈 공간을 삭제
+function doubleClicked() {		// 이벤트함수: 마우스를 더블클릭하면 한 번 실행
+    resizeCanvas(cols*gridSize, rows*gridSize);
+}
+
+function mousePressed() {			// 이벤트함수: 마우스를 누르면 한 번 실행
+  for (let y = 0; y < rows; y++) {		// 세로축(행) 
+    for (let x = 0; x < cols; x++) {		// 가로축(열) 
+      if (grid[y][x].contain(mouseX, mouseY)) {		// 마우스로 누른 위치의 격자 확인
+        grid[y][x].revealed = true;			// 해당 격자의 내용 열기
+      }
+    }
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {			// 스페이스 키를 누르면 게임 초기화, 재실행
+    reset();				// 게임 종료 시: 게임 초기화
+    loop();				// draw() 함수의 무한 반복 실행
+  }
+}
+
+function reset() {			// 게임 초기화
+  console.log('GAME START');
+  gridSize = 100;			// 격자 크기
+  rows = int(height / gridSize);	// 세로축(행) = 600/100 = 6
+  cols = int(width / gridSize);		// 가로축(열) = 600/100 = 6
+
+  grid = [];					// ❶ grid: 1차원 빈 배열의 생성
+  for (let y = 0; y < rows; y++) {		// 세로축(행)
+    grid[y] = [];				// ❷ grid: 2차원 빈 배열로 확장
+    for (let x = 0; x < cols; x++) {		// 가로축(열)
+      grid[y][x] = new Grid(x, y, gridSize);	// ❸ grid: 2차원 객체 배열 생성 및 초기화
+    }
+  }
+
+  let x = int(random(cols));		// 가로축(열) = 0∼5 중 랜덤 정수값
+  let y = int(random(rows));		// 세로축(행) = 0∼5 중 랜덤 정수값
+  grid[y][x].bomb = true;		// 랜덤 좌표에 폭탄 있음으로 설정
+}
+
+class Grid {				// 격자 클래스
+  constructor(x, y, gridSize) {		// 생성자: 속성 추가 및 초기화
+    this.x = x * gridSize;		// 격자 x좌표 초기화
+    this.y = y * gridSize;		// 격자 y좌표 초기화
+    this.size = gridSize;		// 격자 크기 초기화
+    this.bomb = false;			// 격자에 폭탄 없음으로 초기화
+    this.revealed = false;		// 격자의 내용 닫기로 초기화
+  }
+  display() {				// 메소드: 격자 객체 표시
+    stroke(255);
+    noFill();
+    rect(this.x, this.y, this.size, this.size);	// 사각형 표시
+  }
+  hiddenDisplay(hidden) {		// 메소드: 격자에 숨겨진 이미지 표시
+    image(hidden, this.x, this.y, this.size, this.size);		// 숨겨진 이미지 표시
+  }
+  contain(x, y) {		// 메소드: 마우스 위치좌표(x,y)가 격자 사각형 내부인지 여부
+    if (x > this.x && x < this.x + this.size && y > this.y && y < this.y + this.size) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}

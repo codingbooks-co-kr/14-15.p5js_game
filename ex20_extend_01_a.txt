@@ -1,0 +1,40 @@
+// 10개의 이동체 (배열 사용)
+// 4개의 배열변수 필요
+
+let num = 10;		// 이동체 수
+let targetX = [];	// x축 위치 좌표
+let targetY = [];	// y축 위치 좌표
+let targetSize = [];	// 크기
+let targetSpeed = [];	// 속도
+
+function setup() {
+  createCanvas(600, 500);
+  for (let i = 0; i < num; i++) {
+    targetX[i] = 0;
+    targetY[i] = random(height);
+    targetSize[i] = random(20, 50);
+    targetSpeed[i] = random(2, 7);
+  }
+}
+
+function draw() {
+  background(0, 10);	// 페이딩 효과
+
+  for (let i = 0; i < num; i++) {
+    noStroke();
+    fill(255, 200);
+    ellipse(targetX[i], targetY[i], 
+          targetSize[i], targetSize[i]);
+
+    // 오른쪽으로 이동
+    targetX[i] += targetSpeed[i];
+
+    // 오른쪽 경계를 넘어서면 다시 시작
+    if (targetX[i] > width) {
+      targetX[i] = 0;
+      targetY[i] = random(height);
+      targetSize[i] = random(20, 50);
+      targetSpeed[i] = random(2, 7);
+    }
+  }
+}

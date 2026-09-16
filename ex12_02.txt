@@ -1,0 +1,42 @@
+// 2단계: 키보드 방향키로 플레이어 이미지를 상하좌우 이동하기, 이때 해당 방향의 이미지 표시
+
+let playerX, playerY, playerSize = 50, playerSpeed = 2, direction = 0, playerImgs = [];
+
+function preload() {
+  // playerImgs 배열에 이미지 객체를 차례로 저장
+  playerImgs[0] = loadImage('data/rocket0.png');	// 이미지0을 playerImgs[0]에 저장
+  playerImgs[1] = loadImage('data/rocket1.png');	// 이미지1을 playerImgs[1]에 저장
+  playerImgs[2] = loadImage('data/rocket2.png');	// 이미지2를 playerImgs[2]에 저장
+  playerImgs[3] = loadImage('data/rocket3.png');	// 이미지3을 playerImgs[3]에 저장
+}
+
+function setup() {
+  createCanvas(300, 300);
+  playerX = width / 2;			// 플레이어 x좌표 초기화
+  playerY = height / 2;		// 플레이어 y좌표 초기화
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+  imageMode(CENTER);		// 이미지 정렬 모드: 이미지의 가운데에서 폭/높이 설정
+  image(playerImgs[direction], playerX, playerY, playerSize, playerSize);	// 플레이어
+
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    direction = 0;			// 플레이어 이미지: playerImgs[0] 선택
+    playerX -= playerSpeed;		// x축 속도(-부호: 왼쪽) 누적 → 왼쪽 이동 
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    direction = 1;			// 플레이어 이미지: playerImgs[1] 선택
+    playerX += playerSpeed;		// x축 속도(+부호: 오른쪽) 누적 → 오른쪽 이동
+  }
+  if (keyIsDown(UP_ARROW)) {	// 위쪽 방향키를 누른 경우
+    direction = 2;			// 플레이어 이미지: playerImgs[2] 선택
+    playerY -= playerSpeed;		// y축 속도(-부호: 위쪽) 누적 → 위쪽 이동 
+  }
+  if (keyIsDown(DOWN_ARROW)) {	// 아래쪽 방향키를 누른 경우
+    direction = 3;			// 플레이어 이미지: playerImgs[3] 선택
+    playerY += playerSpeed;		// y축 속도(+부호: 아래쪽) 누적 → 아래쪽 이동 
+  }
+  playerX = constrain(playerX, playerSize/2, width-playerSize/2);	// 좌우 이동 제한
+  playerY = constrain(playerY, playerSize/2, height-playerSize/2);	// 상하 이동 제한
+}

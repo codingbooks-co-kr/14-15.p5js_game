@@ -1,0 +1,38 @@
+// 1단계: 키보드 방향키로 플레이어 좌우 이동
+
+let player;
+
+function setup() {
+  createCanvas(300, 300);
+  player = new Player();		// 플레이어 객체 생성 및 초기화
+}
+
+function draw() {
+  background(0);
+
+  player.display();			// 플레이어 객체 표시
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    player.move(-1);			// 플레이어 객체 왼쪽 이동
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    player.move(1);			// 플레이어 객체 오른쪽 이동
+  }
+}
+
+class Player {				// 플레이어 클래스 
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.w = 30;			// 플레이어 폭 초기화
+    this.h = 60;			// 플레이어 높이 초기화
+    this.x = width/2;			// 플레이어 x축 좌표 초기화
+    this.y = height-this.h;		// 플레이어 y축 좌표 초기화
+    this.speed = 3;			// 플레이어 속도 초기화
+  }
+  display() {				// 메소드: 플레이어 객체 표시
+    fill(0, 255, 0);
+    rect(this.x, this.y, this.w, this.h);
+  }
+  move(turn) {				// 메소드: 플레이어 객체 이동
+    this.x += this.speed * turn;	// x축 속도누적 → x축 거리이동 (turn부호: 방향성)
+    this.x = constrain(this.x, 0, width-this.w);		// x축 이동 제한
+  }
+}

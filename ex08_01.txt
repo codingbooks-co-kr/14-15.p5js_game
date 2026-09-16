@@ -1,0 +1,15 @@
+// 사운드 파일 자동 재생
+
+let soundFile;
+
+function preload() {				// setup() 직전에 호출, 외부 파일의 로딩
+  soundFile = loadSound('data/latin.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  createCanvas(200, 100);
+  background(200);
+  textAlign(CENTER, CENTER);			// 문자열 가운데 정렬
+  text('사운드 파일 재생', width/2, height/2);
+  soundFile.play();				// 사운드 파일 재생
+}

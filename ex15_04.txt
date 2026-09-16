@@ -1,0 +1,131 @@
+// 완성: 왼쪽 또는 오른쪽에서 포물선 이동하는 목표물 5개를 맞추면 다음 단계로 이동, 목표물의 크기 감소, 15회 목표물 출현 중 5개를 맞추지 못하면 게임 종료, 스페이스 키를 누르면 재시작
+
+let clapSound, burstSound, burstImg, cosmosImg, targetImg, gunImg, num, score;
+let targetX, targetY, gunX, gunY, targetSize, gunSize, tempSize, speedX, speedY;
+let die, gravity, previousStage, stage = 1;
+
+function preload() {			// setup() 직전에 호출, 외부 파일의 로딩
+  clapSound = loadSound('data/claps.mp3');
+  burstSound = loadSound('data/burst.mp3');
+  burstImg = loadImage('data/burst.png');
+  cosmosImg = loadImage('data/cosmos.jpg');
+  targetImg = loadImage('data/circle1.png');
+  gunImg = loadImage('data/gun.png');
+}
+
+function setup() {
+  createCanvas(600, 600);
+  reset();				// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  image(cosmosImg, width/2, height/2, width, height);	// 배경 이미지 표시
+
+  noStroke();
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  text('Stage: ' + stage + ', Num: ' + num + ', Score : ' + score, width/2, 30);
+  
+  gunDisplay();				// 조준경 표시
+  targetDisplay();			// 목표물과 폭발 효과 표시
+  targetMove();				// 목표물의 포물선 이동
+  gamePause();				// 게임종료 또는 단계이동
+}
+
+function gunDisplay() {			// 조준경 표시
+  gunX = mouseX; 
+  gunY = mouseY;
+  image(gunImg, gunX, gunY, gunSize, gunSize);		// 조준경 이미지 표시
+}
+
+function targetDisplay() {		// 목표물과 폭발 효과 표시
+  if (die) {				// 목표물을 맞춘 경우
+    image(burstImg, targetX, targetY, tempSize*2, tempSize*2);	// 폭발 이미지 표시
+    tempSize = 1;			// 하단 설명의 [주의사항] 참조
+  } else {				// 목표물을 맞추지 못하고 캔버스를 벗어난 경우
+    image(targetImg, targetX, targetY, targetSize, targetSize);		// 목표물 이미지 표시
+    tempSize = targetSize;		// 목표물 크기를 임시변수에 저장(→폭발 시에만 적용)
+  }
+}
+
+function targetMove() {			// 목표물의 포물선 이동
+  targetX += speedX; 			// x축 속도(부호: 방향성) 누적 → x축 거리 이동
+  speedY += gravity;			// y축 속도에 중력 누적 → 낙하 시 가속
+  targetY += speedY; 			// y축 속도(부호: 방향성) 누적 → y축 거리 이동
+
+  if (frameCount % 120 === 0) {	// 2초마다 목표물의 이동 시작
+    if (random(1) < 0.5) startLeft();	// 50% 확률로 목표물의 좌→우 포물선 이동
+    else startRight();			// 50% 확률로 목표물의 우→좌 포물선 이동
+  }
+}
+
+function gamePause() {			// 게임종료 또는 단계이동
+  if (num === 15) {			// 목표물이 15회 출현하면 게임 종료 
+    fill(255);
+    text('GAME OVER', width/2, height/2);
+
+    stage = 1;				// 1단계
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+  if (score >= 7) {			// 목표물을 최소 7개 맞추면 단계 이동
+    clapSound.play();			// 효과음 재생
+    fill(255);
+    text('YOU WIN', width/2, height/2 - 30);
+    text('Hit the space key to start next stage', width/2, height/2 + 30);
+
+    stage++;				// 단계 증가
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function mousePressed() {		// 이벤트함수: 마우스를 누르면 한 번 실행
+  let distance = dist(targetX, targetY, gunX, gunY);	// 목표물∼마우스 거리
+  if (distance < targetSize/2) {		// 목표물을 마우스로 맞춘 경우
+    burstSound.play();			// 효과음 재생
+    die = true;
+    score++;				// 점수 증가
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {			// 스페이스 키를 누르면 게임 초기화, 재실행
+    reset();				// 게임 종료 시: 게임 초기화
+    loop();				// draw() 함수의 무한 반복 실행
+  }
+}
+
+function reset() {			// 게임 초기화
+  startLeft();				// 목표물의 포물선 이동(좌→우) 초기화
+  num = 0;				// 목표물 출현 횟수 초기화
+  gunSize = 70;			// 조준경 크기 초기화
+  gravity = 0.5;			// 중력가속도 초기화
+  score = 0;				// 점수 초기화
+
+  if (stage === 1) {			// 1단계인 경우
+    targetSize = 70;			// 목표물 크기 초기화
+  } else if (stage > 1 && stage !== previousStage) {		// 2단계 이상인 경우 처리
+    targetSize -= 3;			// 목표물 크기 감소
+    if (targetSize < 40) targetSize = 40;			// 목표물 최소크기: 40
+  }
+  previousStage = stage;		// 2단계 이상에서 동일 단계는 한 번만 처리
+  imageMode(CENTER);		// 이미지 정렬 모드: 이미지의 가운데에서 폭/높이 설정
+}
+
+function startLeft() {			// 목표물의 포물선 이동: 좌→우
+  targetX = random(-100, 0);		// 목표물의 x축 좌표 초기화(랜덤 설정)
+  targetY = height;			// 목표물의 y축 좌표 초기화
+  speedX = random(5, 10);		// 목표물의 x축 속도(+부호:오른쪽 방향성) 초기화
+  speedY = random(-25, -10);		// 목표물의 y축 속도(-부호:위쪽 방향성) 초기화
+  num++;				// 목표물의 출현 횟수 증가
+  die = false;
+}
+
+function startRight() {			// 목표물의 포물선 이동: 우→좌
+  targetX = random(width, width+100);	// 목표물의 x축 좌표 초기화(랜덤 설정)
+  targetY = height;			// 목표물의 y축 좌표 초기화
+  speedX = random(-10, -5);		// 목표물의 x축 속도(-부호:왼쪽 방향성) 초기화
+  speedY = random(-25, -10);		// 목표물의 y축 속도(-부호:위쪽 방향성) 초기화
+  num++;				// 목표물의 출현 횟수 증가
+  die = false;
+}

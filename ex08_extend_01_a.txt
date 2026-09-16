@@ -1,0 +1,16 @@
+// 콜백함수를 사용한 사운드 파일 재생
+// [질문8.1] 수정
+
+let soundFile;
+
+function setup() {
+  createCanvas(200, 100);
+  background(200);
+  textAlign(CENTER, CENTER);
+  text('사운드 재생', width/2, height/2);
+  soundFile = loadSound('data/latin.mp3', soundReady);		   // 콜백함수 호출
+}
+
+function soundReady() {  // 콜백함수
+  soundFile.play();	  // 사운드 재생
+}

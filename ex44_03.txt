@@ -1,0 +1,181 @@
+// 완성: 키보드 방향키로 플레이어를 이동하면서 모든 목표물을 획득하면 다음 단계로 이동, 목표물 및 적의 개수, 적의 이동 속도 증가. 이때, 플레이어는 격자(grid) 단위로 이동하고 목표물을 획득할수록 꼬리가 길어짐. 적과 충돌하면 게임 종료되고 스페이스 키를 누르면 재시작
+
+let clapSound, catchSound, burstSound, cosmosImg, burstImg, targetImg, enemyImg, playerImg;
+let player, targets, enemies, targetNum, enemyNum, gridSize, speedUp, previousStage, stage = 1;
+
+function preload() {			// setup() 직전에 호출, 외부 파일의 로딩
+  clapSound = loadSound('data/claps.mp3');
+  catchSound = loadSound('data/catch.mp3');
+  burstSound = loadSound('data/burst.mp3');
+  cosmosImg = loadImage('data/cosmos.jpg');
+  burstImg = loadImage('data/burst.png');
+  targetImg = loadImage('data/circle1.png');
+  enemyImg = loadImage('data/enemy.png');
+  playerImg = loadImage('data/circle2.png');
+}
+
+function setup() {
+  createCanvas(600, 600);
+  reset();				// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  image(cosmosImg, width/2, height/2, width, height);	// 배경 이미지 표시
+ 
+  fill(255);
+  text('Stage: ' + stage, width/2, 60);				// 단계 표시
+
+  player.display();			// 플레이어 객체 표시
+
+  for (let i = targets.length-1; i >= 0; i--) {		// 역순 반복 처리: [참고20.1] 참조
+    targets[i].display();			// 목표물 객체 표시
+    if (player.hit(targets[i])) {		// 플레이어∼목표물 충돌한 경우
+      targets[i].catchTarget();		// 목표물 폭발하는 효과 표시
+      targets.splice(i, 1); 		// targets[i]를 배열에서 삭제
+    }
+  }
+
+  if (targets.length === 0) {		// 모든 목표물이 소멸된 경우 다음 단계로 이동
+    clapSound.play();			// 효과음 재생
+    fill(255);
+    text('YOU WIN', width/2, height/2 - 30);
+    text('Hit the space key to start next stage', width/2, height/2 + 30);
+
+    stage++;				// 단계 상승
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+
+  for (let i = 0; i < enemies.length; i++) {
+    enemies[i].display();		// 적 객체 표시
+    enemies[i].move();			// 적 객체 이동
+    if (player.hit(enemies[i])) {		// 플레이어∼적 충돌한 경우
+      player.explode();			// 플레이어 폭발하는 효과 표시
+      fill(255);
+      text('GAME OVER', width/2, height/2);
+
+      stage = 1;			// 1단계
+      noLoop();				// draw() 함수의 반복 실행 일시 정지
+    }
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {			// 스페이스 키를 누르면 게임 초기화, 재실행
+    reset();				// 게임 종료 시: 게임 초기화
+    loop();				// draw() 함수의 무한 반복 실행
+  }
+  // 방향키를 누를 때마다 격자(grid) 단위로 이동
+  if (keyIsDown(LEFT_ARROW)) player.move(-1, 0);	// 한 격자(grid)씩 왼쪽 이동
+  if (keyIsDown(RIGHT_ARROW)) player.move(1, 0);	// 한 격자(grid)씩 오른쪽 이동
+  if (keyIsDown(UP_ARROW)) player.move(0, -1);	// 한 격자(grid)씩 위쪽 이동
+  if (keyIsDown(DOWN_ARROW)) player.move(0, 1);	// 한 격자(grid)씩 아래쪽 이동
+}
+
+function reset() {			// 게임 초기화
+  if (stage === 1) {			// 1단계인 경우
+    targetNum = 5;			// 목표물 개수 초기화
+    enemyNum = 1;			// 적 개수 초기화
+    speedUp = 0.5;			// 적의 이동 속도 초기화
+  } else if (stage > 1 && stage !== previousStage) {		// 2단계 이상인 경우
+    targetNum++;			// 목표물 개수 증가
+    enemyNum++;			// 적 개수 증가
+    speedUp += 0.5;			// 적의 이동 속도 증가
+  }
+  previousStage = stage;		// 2단계 이상에서 동일 단계는 한 번만 처리
+
+  gridSize = 30;			// 격자 크기 초기화
+  player = new Player(gridSize);	// 플레이어 객체 생성 및 초기화
+
+  targets = [];				// 목표물: 빈 객체 배열로 초기화
+  for (let i = 0; i < targetNum; i++) {
+    targets[i] = new Target(gridSize);	// 목표물 객체 생성 및 초기화
+  }
+
+  enemies = [];			// 적: 빈 객체 배열로 초기화
+  for (let i = 0; i < enemyNum; i++) {
+    enemies[i] = new Enemy(gridSize, speedUp);	// 적 객체 생성 및 초기화
+  }
+
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  imageMode(CENTER);		// 이미지 정렬 모드: 이미지의 가운데에서 폭/높이 설정
+}
+
+class Target {				// 목표물 클래스
+  constructor(gridSize) {		// 생성자: 속성 추가 및 초기화
+    this.size = gridSize;		// 목표물 크기 초기화
+    this.x = random(width-this.size);	// 목표물 x좌표 초기화(랜덤)
+    this.y = random(height-this.size);	// 목표물 y좌표 초기화(랜덤)
+  }
+  display() {				// 메소드: 목표물 객체 표시
+    image(targetImg, this.x, this.y, this.size, this.size);	// 목표물 이미지 표시
+  }
+  catchTarget() {			// 메소드: 목표물 폭발 효과
+    catchSound.play();			// 효과음 재생
+    image(burstImg, this.x, this.y, this.size*2, this.size*2);	// 폭발 이미지 표시
+  }
+}
+
+class Enemy {						// 적 클래스
+  constructor(gridSize, speedUp) {			// 생성자: 속성 추가 및 초기화
+    this.size = gridSize;				// 적 크기 초기화
+    this.x = random(width-this.size);			// 적 x좌표 초기화(랜덤)
+    this.y = random(height-this.size);			// 적 y좌표 초기화(랜덤)
+    this.speedX = random(-0.5, 0.5) + speedUp;	// 적 x축 속도 초기화(랜덤)
+    this.speedY = random(-0.5, 0.5) + speedUp;	// 적 y축 속도 초기화(랜덤)
+  }
+  display() {				// 메소드: 적 객체 표시
+    image(enemyImg, this.x, this.y, this.size, this.size);	// 적 이미지 표시
+  }
+  move() {				// 메소드: 적 객체 이동
+    this.x += this.speedX;   		// x축 속도 누적 → x축 거리 이동
+    this.y += this.speedY;   		// y축 속도 누적 → y축 거리 이동
+    if (this.x < 0 || this.x > width-this.size) {		// x축 경계 반사조건
+      this.speedX *= -1;		// 속도의 방향 반전, 즉 반사
+    }
+    if (this.y < 0 || this.y > height-this.size) {		// y축 경계 반사조건
+      this.speedY *= -1;		// 속도의 방향 반전, 즉 반사
+    }
+  }
+}
+
+class Player {				// 플레이어 클래스 
+  constructor(gridSize) {		// 생성자: 속성 추가 및 초기화
+    this.x = width / 2;			// 플레이어 x좌표 초기화
+    this.y = height / 2;		// 플레이어 y좌표 초기화
+    this.size = gridSize;		// 플레이어 크기 초기화
+    this.speed = gridSize;		// 플레이어 속도 초기화
+    this.tailNum = 0;			// 플레이어 꼬리 수 초기화
+    this.tail = [];			// 플레이어 꼬리: 빈 객체 배열로 초기화
+  }
+  display() {				// 메소드: 플레이어 객체 표시
+    for (let i = 0; i < this.tail.length; i++) {
+      image(targetImg, this.tail[i].x, this.tail[i].y, this.size, this.size);	// 플레이어 꼬리
+    }
+    image(playerImg, this.x, this.y, this.size, this.size);		// 플레이어 머리
+  }
+  explode() {				// 메소드: 플레이어 객체 폭발 효과 표시
+    burstSound.play();			// 효과음 재생
+    image(burstImg, this.x, this.y, this.size*2, this.size*2);		// 폭발 이미지 표시
+  }
+  move(turnX, turnY) {				// 메소드: 플레이어 객체 이동
+    let tailVector = { x: this.x, y: this.y };	// 객체 리터럴
+    this.tail.push(tailVector);			// tail 배열 끝에 새 객체요소 추가
+    if (this.tail.length > this.tailNum) {		// tail 배열의 크기가 tailNum 이상일 때
+      this.tail.shift();				// tail 배열 맨 앞의 객체요소 삭제
+    }
+    this.x += this.speed * turnX;		// x축 속도누적 → 거리이동 (turnX: 방향성)
+    this.y += this.speed * turnY;		// y축 속도누적 → 거리이동 (turnY: 방향성)
+    this.x = constrain(this.x, 0, width-this.size);	// x축 이동 제한
+    this.y = constrain(this.y, 0, height-this.size);	// y축 이동 제한
+  }
+  hit(other) {						// 메소드: 두 객체의 충돌 여부 판단
+    let distance = dist(this.x, this.y, other.x, other.y);	// 두 객체의 거리 측정
+    if (distance < (this.size + other.size) / 2) {	// 두 객체의 충돌 시
+      this.tailNum++;					// 꼬리 수 증가
+      return true;					// 충돌 시 true 반환
+    } else {						// 두 객체의 미 충돌 시
+      return false;					// 미 충돌 시 false 반환
+    }
+  }
+}

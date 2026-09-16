@@ -1,0 +1,31 @@
+// 4단계: 6×2 크기의 사각형 벽돌 배열 만들기
+
+let rows, cols, bricks = [], w = 100, h = 30;	// ❶ bricks: 1차원 빈 배열의 생성
+
+function setup() {
+  createCanvas(600, 300);
+  rows = 2;					// 세로축(행) 벽돌 개수
+  cols = int(width / w);			// 가로축(열) 벽돌 개수
+  for (let i = 0; i < rows; i++) {		// 세로축(행) 순차 반복 처리
+    bricks[i] = [];				// ❷ bricks: 2차원 빈 배열로 확장
+    for (let j = 0; j < cols; j++) {		// 가로축(열) 순차 반복 처리
+      bricks[i][j] = 1;				// ❸ bricks: 2차원 배열의 초기화
+    }
+  }
+}
+
+function draw() {
+  background(0);
+  
+  stroke(255);
+  strokeWeight(3);
+  fill(100);
+  //rectMode(CORNER);		// (생략가능)사각형 좌상단 모서리 기준 폭/높이 설정
+  for (let i = 0; i < rows; i++) {	// 세로축(행) 순차 반복 처리
+    for (let j = 0; j < cols; j++) {	// 가로축(열) 순차 반복 처리
+      if (bricks[i][j] === 1) {		// 벽돌 있음:1 (없음:0)
+        rect(j*w, i*h, w, h);		// 사각형 벽돌 표시
+      }
+    }
+  }
+}

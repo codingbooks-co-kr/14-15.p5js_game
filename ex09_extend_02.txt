@@ -1,0 +1,108 @@
+// 화면분할(시작/게임/종료): 낙하하는 목표물 잡기, 놓치면 게임종료, 스페이스키를 누르면 재시작, 'f'키를 누르면 모니터 전체 화면
+
+let catchSound, burstSound, burstImg, cosmosImg, targetImg, playerImg, score;
+let playerX, playerY, targetX, targetY, targetSpeed, isGameEnd;
+let targetSize = 30, w = 100, h = 20, step = 0;
+
+function preload() {		// setup() 직전에 호출, 외부 파일의 로딩
+  catchSound = loadSound('data/catch.mp3');
+  burstSound = loadSound('data/burst.mp3');
+  burstImg = loadImage('data/burst.png');
+  cosmosImg = loadImage('data/cosmos.jpg');
+  targetImg = loadImage('data/circle1.png');
+  playerImg = loadImage('data/brick.png');
+}
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);		// ❶캔버스 최대 화면 크기
+}
+
+function draw() {
+  if (step === 0) gameStart();		// 시작 화면
+  else if (step === 1) gameOn();	// 게임 화면
+  else if (step === 2) gameEnd();	// 종료 회면
+}
+
+function gameStart() {			// 게임 시작 및 초기화
+  background(0, 0, 255);		// 배경색: Blue
+  reset();				// 게임 초기화: 목표물의 위치, 속도, 크기 설정
+}
+
+function gameOn() {
+  image(cosmosImg, width/2, height/2, width, height);	// 배경 이미지 표시
+  isGameEnd = false;
+  
+  fill(255);
+  textSize(30);
+  text('Score: ' + score, width/2, 30);				// 점수 표시
+  
+  image(targetImg, targetX, targetY, targetSize, targetSize);	// 목표물 이미지 표시
+
+  playerX = constrain(mouseX, w/2, width-w/2);		// 플레이어 x축 이동 제한
+  playerY = height - h;					// 플레이어 y축 위치 고정
+  image(playerImg, playerX, playerY, w, h);			// 플레이어 이미지 표시
+
+  targetY += targetSpeed;		// y축 속도 누적 → 낙하
+  if (targetY > height) {		// 목표물이 캔버스 바닥을 벗어난 경우
+    isGameEnd = true;
+
+    burstSound.play();			// 효과음 재생
+    image(burstImg, targetX, targetY, targetSize*2, targetSize*2);	// 폭발 이미지 표시
+
+    fill(255);
+    text('GAME OVER', width/2, height/2);
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+
+  if (targetX > playerX-w/2 && targetX < playerX+w/2 && targetY > playerY) {
+    catchSound.play();			// 효과음 재생
+    targetX = random(targetSize/2, width-targetSize/2);	// 목표물 x축 좌표 초기화
+    targetY = 0;						// 목표물 y축 좌표 초기화
+    targetSpeed++;			// 낙하 속도 증가
+    score++;				// 점수 증가
+  }
+}
+
+function gameEnd() {
+  background(0);			// 배경색: Black
+
+  fill(255);
+  textSize(50);
+  text('Final Score: ' + score, width/2, height/2);		// 최종점수 표시
+
+  textSize(20);
+  text('Hit the space key to restart', width/2, height-50);
+}
+
+function keyPressed() {				// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (isGameEnd && key === ' ') {
+    step = (step + 1) % 3;
+    loop();					// draw() 함수의 무한반복 실행
+  } else if (key === 'f') {			// ‘f’ 키를 누른 경우
+    fullscreen(true);				// ❷모니터의 전체 화면 크기
+  }
+}
+
+// ❸브라우저 창의 크기가 조정될 때마다 자동 호출
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
+
+function reset() {			// 게임 초기화
+  isGameEnd = true;
+  targetX = random(targetSize/2, width-targetSize/2);		// 목표물 x축 좌표 초기화
+  targetY = 0;							// 목표물 y축 좌표 초기화
+  targetSpeed = 2;			// 목표물 속도 초기화
+  score = 0;				// 점수 초기화
+
+  fill(255);
+  textSize(50);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  text('Target Catching Game', width/2, height/2);
+
+  textSize(20);
+  text('Hit the space key to start', width/2, height-50);
+
+  imageMode(CENTER);		// 이미지 정렬 모드: 이미지의 가운데에서 폭/높이 설정
+  noLoop();				// draw() 함수의 반복 실행 일시 정지
+}

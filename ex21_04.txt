@@ -1,0 +1,27 @@
+// 4단계: 위에서 아래로 끊임없이 이동하는 목표물
+
+let targets = [];
+
+function setup() {
+  createCanvas(500, 600);
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+
+  if (frameCount % 30 === 0) {	// 0.5초마다 target 객체 생성 후 targets 배열에 추가
+    let target = { x: random(width), y: 0, size: random(20, 40), speed: random(1, 2) };
+    targets.push(target);		// 생성된 target 객체를 targets 배열에 추가
+  }
+
+  noStroke();				// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+  fill(255, 200);
+  for (let i = targets.length-1; i >= 0; i--) {		// 목표물 객체별 역순 반복 처리
+    ellipse(targets[i].x, targets[i].y, targets[i].size, targets[i].size);	// 목표물 표시
+    targets[i].y += targets[i].speed;	// 목표물의 y축 속도 누적 → 아래쪽 이동
+    if (targets[i].y > height) {		// 목표물이 캔버스 바닥을 벗어난 경우
+      targets.splice(i, 1);		// targets[i] 목표물 객체 제거
+    }
+  }
+  console.log(targets.length);		// targets 배열요소의 개수 확인
+}

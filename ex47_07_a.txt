@@ -1,0 +1,31 @@
+// 아두이노: 게임종료여부값 수신 후 부저음 출력 및 LED 점멸 제어, 푸시버튼값 송신
+
+#define BUTTON 2			// 버튼 핀번호: 2
+#define BUZZER 13			// 부저 핀번호: 13
+#define LED 6				// LED 핀번호: 6
+
+void setup() {
+  pinMode(BUTTON, INPUT);		// 푸시버튼핀을 입력으로 사용
+  pinMode(BUZZER, OUTPUT);		// 부저핀을 출력으로 사용
+  pinMode(LED, OUTPUT);		// LED핀을 출력으로 사용
+  Serial.begin(9600);			// 전송속도: 9,600bps
+  while (Serial.available() == 0) {	// 수신버퍼에 수신값이 없는 동안 반복 실행
+    Serial.write('A');			// 시작신호('A') 전송
+    delay(300);				// 0.3초 대기
+  }
+}
+
+void loop( ) { }
+
+void serialEvent() {			// 이벤트함수: 수신값이 있으면 자동 호출
+  int gameOver = Serial.read(); 	// 수신: 게임종료여부(0 또는 1)
+  if (gameOver == 1) { 		// 게임 종료 시 LED 점멸 및 부저 ON/OFF
+    digitalWrite(LED, 1);		// LED 점등
+    tone(BUZZER, 440, 200);		// 440Hz음을 200msec동안 출력
+    delay(400);				// (게임종료이므로 딜레이시간은 게임진행에 영향 없음)
+  } else {				// 게임 중
+    digitalWrite(LED, 0);		// LED 소등
+  }
+  int value = digitalRead(BUTTON);	// 푸시버튼값 읽기
+  Serial.write(value);			// 송신 (푸시버튼값)
+}

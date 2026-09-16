@@ -1,0 +1,124 @@
+// 완성: 플레이어(라켓)로 볼을 쳐(→중력가속도와 마찰 적용) 목표물 5개를 맞추면 다음 단계로 이동하고 플레이어(라켓)의 폭 감소, 볼을 놓치면 게임 종료, 스페이스 키를 누르면 재시작
+
+let clapSound, catchSound, burstSound, burstImg, cosmosImg, targetImg, score;
+let targetX, targetY, playerX, playerY, ballX, ballY, targetSize, ballSize, speedX, speedY;
+let w, h, gravity, friction, previousStage, stage = 1;
+
+function preload() {			// setup() 직전에 호출, 외부 파일의 로딩
+  clapSound = loadSound('data/claps.mp3');
+  catchSound = loadSound('data/catch.mp3');
+  burstSound = loadSound('data/burst.mp3');
+  burstImg = loadImage('data/burst.png');
+  cosmosImg = loadImage('data/cosmos.jpg');
+  targetImg = loadImage('data/circle1.png');
+}
+
+function setup() {
+  createCanvas(600, 500);
+  reset();				// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  image(cosmosImg, width/2, height/2, width, height);	// 배경 이미지 표시
+  
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  text('Stage: ' + stage + ', Score: ' + score, width/2, 30);		// 단계, 점수 표시
+  
+  display();				// 캐릭터(목표물, 볼, 플레이어) 표시
+  move();				// 볼 이동
+  getTarget();				// 목표물 획득 시 처리
+}
+
+function display() {			// 캐릭터(목표물, 볼, 플레이어) 표시
+  image(targetImg, targetX, targetY, targetSize, targetSize);	// 목표물 이미지 표시
+  
+  fill(255);
+  ellipse(ballX, ballY, ballSize, ballSize);		// 볼 표시
+  
+  playerX = constrain(mouseX, w/2, width-w/2);	// 플레이어의 좌우 이동 제한
+  playerY = constrain(mouseY, h/2, height-h/2);	// 플레이어의 상하 이동 제한
+
+  fill(0, 255, 0);
+  rectMode(CENTER);			// 사각형의 정가운데를 기준으로 폭과 높이 설정
+  rect(playerX, playerY, w, h);		// 플레이어 표시
+}
+
+function move() {			// 볼 이동
+  ballX += speedX;			// x축 속도 누적 → x축 거리 이동 
+  speedY += gravity;			// y축 속도에 중력 누적 → 낙하 시 가속
+  ballY += speedY;			// y축 속도 누적 → y축 거리 이동 
+
+  if (ballX < ballSize/2 || ballX > (width - ballSize/2)) {	// 볼이 좌우 경계에 충돌 시
+    speedX *= -1;			// 볼 속도의 방향 반전, 즉 반사
+  }
+  if (ballX > (playerX - w/2) && ballX < (playerX + w/2) && ballY > (playerY - (ballSize + h) / 2)) {			// 플레이어로 볼을 치는 경우
+    ballY = playerY - (ballSize + h) / 2;	// ballY 위치는 라켓 상단(→[참고16.1] 참조)
+    speedY *= -1;			// 반사 적용
+    speedY *= friction;			// (감쇄)마찰율 적용
+    if (speedY > -1) speedY = -10;	// 볼이 거의 반사되지 않고 정지할 경우 강제 재점프
+  }
+
+  if (ballY > height) {			// 볼이 캔버스 바닥을 벗어난 경우
+    burstSound.play();						// 효과음 재생
+    image(burstImg, ballX, ballY, ballSize*2, ballSize*2);	// 폭발 이미지 표시
+
+    fill(255);
+    text('GAME OVER', width/2, height/2);
+
+    stage = 1;				// 1단계
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function getTarget() {			// 목표물 획득 시 처리
+  let distance = dist(targetX, targetY, ballX, ballY);	// 목표물∼볼 거리
+  if (distance < (targetSize + ballSize) / 2) {		// 목표물과 볼 충돌
+    catchSound.play();					// 효과음 재생
+    targetX = random(targetSize, width-targetSize);	// 목표물의 x축 좌표 랜덤 변경
+    targetY = random(targetSize, height-targetSize);	// 목표물의 y축 좌표 랜덤 변경
+    score++;						// 점수 증가
+  }
+
+  if (score >= 5) {			// 목표물을 최소 5개 맞추면 단계 이동
+    clapSound.play();			// 효과음 재생
+    fill(255);
+    text('YOU WIN', width/2, height/2 - 30);
+    text('Hit the space key to start next stage', width/2, height/2 + 30);
+
+    stage++;				// 단계 증가
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {			// 스페이스 키를 누르면 게임 초기화, 재실행
+    reset();				// 게임 종료 시: 게임 초기화
+    loop();				// draw() 함수의 무한 반복 실행
+  }
+}
+
+function reset() {			// 게임 초기화
+  targetSize = 60;			// 목표물 크기 초기화
+  targetX = random(targetSize, width-targetSize);	// 목표물의 x축 좌표 초기화(랜덤)
+  targetY = random(targetSize, height-targetSize);	// 목표물의 y축 좌표 초기화(랜덤)
+  ballSize = 30;					// 볼 크기 초기화
+  ballX = random(ballSize/2, width-ballSize/2);		// 볼 x축 좌표 초기화(랜덤)
+  ballY = ballSize / 2;					// 볼 y축 좌표 초기화
+  speedX = random(2, 5);				// 볼 x축 속도 초기화(랜덤)
+  speedY = 0;						// 볼 y축 속도 초기화
+  h = 30;				// 플레이어의 높이 초기화
+  gravity = 0.3;				// 중력가속도 초기화
+  friction = 0.95;			// 마찰율 초기화
+  score = 0;				// 점수 초기화
+
+  if (stage === 1) {			// 1단계인 경우
+    w = 100;				// 플레이어(라켓)의 폭 초기화
+  } else if (stage > 1 && stage !== previousStage) {	// 2단계 이상인 경우
+    w -= 10;				// 플레이어(라켓)의 폭 감소
+    if (w < 50) w = 50;		// 플레이어(라켓)의 최소폭: 50
+  }
+  previousStage = stage;		// 2단계 이상에서 동일 단계는 한 번만 처리
+  imageMode(CENTER);		// 이미지 정렬 모드: 이미지의 가운데에서 폭/높이 설정
+}

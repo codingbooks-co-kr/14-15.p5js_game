@@ -1,0 +1,12 @@
+// frameRate() 기반 시간 측정: 0.5초마다 원형 생성
+
+function setup() {
+  createCanvas(300, 300);
+  frameRate(2);					// 0.5초마다 draw() 실행
+  background(0);
+}
+
+function draw() {
+  fill(random(width), random(width), random(width), 200);
+  ellipse(random(width), random(height), 50, 50);
+}

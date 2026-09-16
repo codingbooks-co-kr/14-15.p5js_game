@@ -1,0 +1,67 @@
+// 완성: 6개의 카드를 하나씩 뒤집어 폭탄이 나오면 게임 종료, 스페이스 키를 누르면 재시작
+
+let burstSound, heartImg, bombImg, cardImg;
+let bombIndex, cards, revealed, x, y, w, h;
+
+function preload() {			// setup() 직전에 호출, 외부 파일의 로딩
+  burstSound = loadSound('data/burst.mp3');
+  heartImg = loadImage('data/heart.png');
+  bombImg = loadImage('data/burst.png');
+  cardImg = loadImage('data/card.png');
+}
+
+function setup() {
+  createCanvas(600, 240);
+  reset();				// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  background(0);
+  
+  for (let i = 0; i < cards.length; i++) {
+    x = i *100 + 10;
+    image(cards[i], x, y, w, h);		// 카드 뒷면 이미지 표시
+
+    if (revealed[i]) {			// 숨겨진 이미지 확인
+      image(cards[i], x, y, w, h);	// 숨겨진 이미지(→하트, 폭탄) 표시
+      if (i === bombIndex) {		// 숨겨진 이미지가 폭탄인 경우
+        burstSound.play();		// 효과음 재생
+        fill(255);
+        textSize(30);
+        textAlign(CENTER, CENTER);	// 문자열 가운데 정렬
+        text('GAME OVER', width/2, height-50);
+        noLoop();			// draw() 함수의 반복 실행 일시 정지
+      }
+    }
+  }
+}
+
+function mousePressed() {		// 이벤트함수: 마우스를 누르면 한 번 실행
+  for (let i = 0; i < cards.length; i++) {
+    x = i *100 + 10;
+    if (mouseX > x && mouseX < x+w && mouseY > y && mouseY < y+h) {
+      revealed[i] = true;		// 숨겨진 이미지 확인 가능
+      if (i === bombIndex) {		// 숨겨진 이모지가 폭탄인 경우
+        cards[i] = bombImg;		// 배열요소를 폭탄 이미지로 대체
+      } else {
+        cards[i] = heartImg;		// 배열요소를 하트 이미지로 대체
+      }
+    }
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {			// 스페이스 키를 누르면 게임 재시작
+    reset();				// 게임 종료 시: 게임 초기화
+    loop(); 				// draw() 함수의 무한 반복 실행
+  }
+}
+
+function reset() {			// 게임 초기화
+  y = 40;				// 카드 y축 좌표 초기화
+  w = 80;				// 카드 폭 초기화
+  h = 120;				// 카드 높이 초기화
+  cards = [cardImg, cardImg, cardImg, cardImg, cardImg, cardImg];	// 이미지로 초기화
+  revealed = [false, false, false, false, false, false];	// false로 배열 초기화
+  bombIndex = int(random(cards.length));		// 폭탄 인덱스(0∼5)를 저장
+}

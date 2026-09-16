@@ -1,0 +1,37 @@
+// 1단계: 스페이스 키를 누를 때마다 10개의 목표물 랜덤 생성
+
+let targets = [], targetNum = 10;
+
+function setup() {
+  createCanvas(300, 300);
+  for (let i = 0; i < targetNum; i++) {	// 실행 초기 10개(=targetNum)의 목표물 생성
+    targets[i] = new Target();		// 목표물 객체 생성 및 초기화
+  }
+}
+
+function draw() {
+  background(0);
+  for (let i = 0; i < targets.length; i++) {
+    targets[i].display();			// 목표물 객체 표시
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {			// 스페이스 키를 누르면 게임 초기화, 재실행
+    for (let i = 0; i < targetNum; i++) {
+      targets[i] = new Target();	// 목표물 객체 생성 및 초기화
+    }
+  }
+}
+
+class Target {				// 목표물 클래스
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.size = 30;			// 목표물 크기 초기화
+    this.x = random(this.size/2, width-this.size/2);	// 목표물 x좌표 초기화(랜덤)
+    this.y = random(this.size/2, height-this.size/2);	// 목표물 y좌표 초기화(랜덤)
+  }
+  display() {				// 메소드: 목표물 객체 표시
+    fill(255, 200);
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+}

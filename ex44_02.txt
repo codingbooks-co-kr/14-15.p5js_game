@@ -1,0 +1,83 @@
+// 2단계: 방향키로 플레이어를 격자(grid) 단위로 이동하면서 목표물을 획득할수록 꼬리가 길어짐. 
+
+let player, gridSize = 30, targets = [], targetNum = 10;
+
+function setup() {
+  createCanvas(600, 600);
+  player = new Player(gridSize);		// 플레이어 객체 생성 및 초기화
+  for (let i = 0; i < targetNum; i++) {
+    targets[i] = new Target(gridSize);		// 목표물 객체 생성 및 초기화
+  }
+}
+
+function draw() {
+  background(0);
+  player.display();				// 플레이어 객체 표시
+  for (let i = targets.length-1; i >= 0; i--) {	// 역순 반복 처리: [참고20.1] 참조
+    targets[i].display();				// 목표물 객체 표시
+    if (player.hit(targets[i])) {			// 플레이어∼목표물 충돌한 경우
+      targets.splice(i, 1);  			// targets[i]를 배열에서 삭제
+    }
+  }
+}
+
+// 방향키를 누를 때마다 격자(grid) 단위로 이동
+function keyPressed() {				// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (keyIsDown(LEFT_ARROW)) player.move(-1, 0);	// 한 격자(grid)씩 왼쪽 이동
+  if (keyIsDown(RIGHT_ARROW)) player.move(1, 0);	// 한 격자(grid)씩 오른쪽 이동
+  if (keyIsDown(UP_ARROW)) player.move(0, -1);	// 한 격자(grid)씩 위쪽 이동
+  if (keyIsDown(DOWN_ARROW)) player.move(0, 1);	// 한 격자(grid)씩 아래쪽 이동
+}
+
+class Target {					// 목표물 클래스
+  constructor(gridSize) {			// 생성자: 속성 추가 및 초기화
+    this.size = gridSize;			// 목표물 크기 초기화
+    this.x = random(width-this.size);		// 목표물 x좌표 초기화(랜덤)
+    this.y = random(height-this.size);		// 목표물 y좌표 초기화(랜덤)
+  }
+  display() {					// 메소드: 목표물 객체 표시
+    fill(255);
+    rect(this.x, this.y, this.size, this.size);
+  }
+}
+
+class Player {					// 플레이어 클래스 
+  constructor(gridSize) {			// 생성자: 속성 추가 및 초기화
+    this.x = width / 2;				// 플레이어 x좌표 초기화
+    this.y = height / 2;			// 플레이어 y좌표 초기화
+    this.size = gridSize;			// 플레이어 크기 초기화
+    this.speed = gridSize;			// 플레이어 속도 초기화
+    this.tailNum = 0;				// 플레이어 꼬리 수 초기화
+    this.tail = [];				// 플레이어 꼬리(tail)를 빈 배열로 초기화
+  }
+  display() {					// 메소드: 플레이어 객체 표시
+    stroke(0);
+    fill(255, 255, 0);
+    for (let i = 0; i < this.tail.length; i++) {
+      rect(this.tail[i].x, this.tail[i].y, this.size, this.size);		// 플레이어 꼬리 표시
+    }
+    fill(0, 255, 0);
+    ellipseMode(CORNER);			// 원의 좌상단 모서리 기준 원을 그리는 모드
+    ellipse(this.x, this.y, this.size, this.size);	// 플레이어 머리 표시
+  }
+  move(turnX, turnY) {				// 메소드: 플레이어 객체 이동
+    let tailVector = { x: this.x, y: this.y };	// 객체 리터럴
+    this.tail.push(tailVector);			// tail 배열 끝에 새 객체요소 추가
+    if (this.tail.length > this.tailNum) {		// tail 배열의 크기가 tailNum 이상일 때
+      this.tail.shift();				// tail 배열 맨 앞의 객체요소 삭제
+    }
+    this.x += this.speed * turnX;		// x축 속도누적 → 거리이동 (turnX: 방향성)
+    this.y += this.speed * turnY;		// y축 속도누적 → 거리이동 (turnY: 방향성)
+    this.x = constrain(this.x, 0, width-this.size);	// x축 이동 제한
+    this.y = constrain(this.y, 0, height-this.size);	// y축 이동 제한
+  }
+  hit(other) {						// 메소드: 두 객체의 충돌 여부 판단
+    let distance = dist(this.x, this.y, other.x, other.y);	// 두 객체의 거리 측정
+    if (distance < (this.size + other.size) / 2) {	// 두 객체의 충돌 시
+      this.tailNum++;					// 꼬리 수 증가
+      return true;					// 충돌 시 true 반환
+    } else {						// 두 객체의 미 충돌 시
+      return false;					// 미 충돌 시 false 반환
+    }
+  }
+}

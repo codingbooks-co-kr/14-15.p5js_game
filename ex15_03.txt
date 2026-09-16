@@ -1,0 +1,71 @@
+// 3단계: 왼쪽 또는 오른쪽에서 랜덤 포물선 이동하는 목표물 맞추기, 조준경 눈금을 표시하고 목표물을 맞추면 폭발하는 효과 삽입
+
+let targetX, targetY, gunX, gunY, speedX, speedY, die;
+let targetSize = 70, gunSize = 50, gravity = 0.5, score = 0;
+
+function setup() {
+  createCanvas(600, 600);
+  startLeft();			// 목표물의 포물선 이동(좌→우) 초기화
+}
+
+function draw() {
+  background(0);
+
+  noStroke();
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  text('점수 : ' + score, width/2, 30);	// 점수 표시
+
+  if (die) {				// 목표물을 맞춘 경우 (목표물 크기=0)
+    fill(255, 0, 0);
+    ellipse(targetX, targetY, targetSize*2, targetSize*2);	// 폭발 효과 표시
+    targetSize = 0;			// 목표물 소멸(크기=0)
+  } else {				// 목표물을 맞추지 못하면 재이동 (목표물 크기=70)
+    fill(0, 255, 0);
+    ellipse(targetX, targetY, targetSize, targetSize);		// 목표물 표시
+    targetSize = 70;			// 목표물 출현(크기=70)
+  }
+
+  gunX = mouseX;			// 조준경 x축 좌표
+  gunY = mouseY;			// 조준경 y축 좌표
+  stroke(255);
+  noFill();
+  ellipse(gunX, gunY, gunSize, gunSize);			// 조준경 작은 원
+  ellipse(gunX, gunY, gunSize*2, gunSize*2);			// 조준경 큰 원
+  line(gunX-gunSize, gunY, gunX+gunSize, gunY);		// 조준경 가로선
+  line(gunX, gunY-gunSize, gunX, gunY+gunSize);		// 조준경 세로선
+
+  targetX += speedX; 			// x축 속도(부호: 방향성) 누적 → x축 거리 이동
+  speedY += gravity;  			// y축 속도에 중력 누적 → 낙하 시 가속
+  targetY += speedY; 			// y축 속도(부호: 방향성) 누적 → y축 거리 이동
+
+  if (frameCount % 120 === 0) {	// 2초마다 목표물의 이동 시작
+    if (random(1) < 0.5) startLeft();	// 50% 확률로 목표물의 좌→우 포물선 이동
+    else startRight();			// 50% 확률로 목표물의 우→좌 포물선 이동
+  }
+}
+
+function startLeft() {			// 목표물의 포물선 이동: 좌→우
+  targetX = random(-100, 0);		// 목표물의 x축 좌표 초기화(랜덤 설정)
+  targetY = height;			// 목표물의 y축 좌표 초기화
+  speedX = random(5, 10);		// 목표물의 x축 속도(+부호:오른쪽 방향성) 초기화
+  speedY = random(-25, -10);		// 목표물의 y축 속도(-부호:위쪽 방향성) 초기화
+  die = false;
+}
+
+function startRight() {			// 목표물의 포물선 이동: 우→좌
+  targetX = random(width, width+100);	// 목표물의 x축 좌표 초기화(랜덤 설정)
+  targetY = height;			// 목표물의 y축 좌표 초기화
+  speedX = random(-10, -5);		// 목표물의 x축 속도(-부호:왼쪽 방향성) 초기화
+  speedY = random(-25, -10);		// 목표물의 y축 속도(-부호:위쪽 방향성) 초기화
+  die = false;
+}
+
+function mousePressed() {		// 이벤트함수: 마우스를 누르면 한 번 실행
+  let distance = dist(targetX, targetY, gunX, gunY);	// 목표물∼마우스 거리
+  if (distance < targetSize/2) {		// 목표물을 마우스로 맞춘 경우
+    score++;				// 점수 증가
+    die = true;
+  }
+}

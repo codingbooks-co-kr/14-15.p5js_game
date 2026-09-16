@@ -1,0 +1,87 @@
+// 3단계: 방향키로 플레이어를 좌우로 이동하면서 낙하하는 적 객체 피하기, 충돌하면 게임 종료
+
+let player, enemies = [], enemyNum = 8;
+
+function setup() {
+  createCanvas(400, 600);
+  player = new Player();			// 플레이어 객체 생성 및 초기화
+  let spacing = width / enemyNum;		// 적 객체 사이의 간격
+  for (let i = 0; i < enemyNum; i++) {
+    enemies[i] = new Enemy(i*spacing+10);	// 적 객체 생성 및 초기화
+  }
+}
+
+function draw() {
+  background(0);
+  
+  noStroke();
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);			// 문자열 가운데 정렬
+  let drivingTime = millis() / 1000;		// 실행 이후의 경과시간(초) 측정
+  text('Driving Time: ' + nf(drivingTime, 2, 1) + ' sec', width/2, 30);
+
+  player.display();				// 플레이어 객체 표시
+  if (keyIsDown(LEFT_ARROW)) {		// 왼쪽 방향키를 누른 경우
+    player.move(-1);				// 플레이어 객체 왼쪽 이동
+  }
+  if (keyIsDown(RIGHT_ARROW)) {		// 오른쪽 방향키를 누른 경우
+    player.move(1);				// 플레이어 객체 오른쪽 이동
+  }
+
+  for (let i = 0; i < enemies.length; i++) {
+    enemies[i].display();			// 적 객체 표시
+    enemies[i].move();				// 적 객체 이동
+    if (player.hit(enemies[i])) {			// 플레이어∼적 충돌한 경우
+      fill(255);
+      text('GAME OVER', width/2, height/2);
+      noLoop();					// draw() 함수의 반복 실행 일시 정지
+    }
+  }
+}
+
+class Enemy {				// 적 클래스
+  constructor(x) {			// 생성자: 속성 추가 및 초기화
+    this.x = x;				// 적 x축 좌표 초기화
+    this.y = 0;				// 적 y축 좌표 초기화
+    this.w = 30;			// 적 폭 초기화
+    this.h = 60;			// 적 높이 초기화
+    this.speed = random(1, 6);	// 적 속도 초기화(랜덤)
+  }
+  display() {				// 메소드: 적 객체 표시
+    fill(255);
+    rect(this.x, this.y, this.w, this.h);
+  }
+  move() {				// 메소드: 적 객체 낙하
+    this.y += this.speed;		// y축 속도 누적 → y축 거리 이동 (부호: 방향성)
+    if (this.y > height) {		// 적 객체가 캔버스 화면 바닥을 벗어나는 경우
+      this.y = -this.h;			// 다시 캔버스 화면 위쪽에서 시작
+      this.speed = random(1, 6);	// 낙하 속도 랜덤 초기화
+    }
+  }
+}
+
+class Player {				// 플레이어 클래스 
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.w = 30;			// 플레이어 폭 초기화
+    this.h = 60;			// 플레이어 높이 초기화
+    this.x = width/2;			// 플레이어 x축 좌표 초기화
+    this.y = height-this.h;		// 플레이어 y축 좌표 초기화
+    this.speed = 3;			// 플레이어 속도 초기화
+  }
+  display() {				// 메소드: 플레이어 객체 표시
+    fill(0, 255, 0);
+    rect(this.x, this.y, this.w, this.h);
+  }
+  move(turn) {				// 메소드: 플레이어 객체 이동
+    this.x += this.speed * turn;	// x축 속도누적 → x축 거리이동 (turn부호: 방향성)
+    this.x = constrain(this.x, 0, width-this.w);		// x축 이동 제한
+  }
+  hit(other) {				// 메소드: 두 사각형의 충돌 여부 판단
+    if (this.x < other.x+other.w && this.x+this.w > other.x && this.y < other.y+other.h && this.y+this.h > other.y) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}

@@ -1,0 +1,33 @@
+// 2단계: 낙하할수록 속도가 빨라지는 목표물
+
+let targetX, targetY, targetSize = 30, targetSpeed = 2, num = 0;
+
+function setup() {
+  createCanvas(300, 200);
+  targetX = random(targetSize/2, width-targetSize/2);		// 목표물 x축 좌표 초기화
+  targetY = 0;							// 목표물 y축 좌표 초기화
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+
+  noStroke();				// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+  fill(255);
+  ellipse(targetX, targetY, targetSize, targetSize);		// 낙하하는 목표물
+  
+  targetY += targetSpeed;		// y축 속도 누적 → 낙하
+  if (targetY > height) {		// 목표물이 캔버스 바닥을 벗어난 경우
+    targetX = random(targetSize/2, width-targetSize/2);	// 목표물 x축 좌표 초기화
+    targetY = 0;						// 목표물 y축 좌표 초기화
+    targetSpeed++;			// 낙하 속도 증가
+    num++;				// 낙하 횟수 증가
+  }
+  
+  if (num === 10) {			// 10회 낙하 시 게임 종료
+    fill(255);
+    textSize(30);
+    textAlign(CENTER, CENTER);	// 문자열 가운데 정렬
+    text('GAME OVER', width/2, height/2);
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}

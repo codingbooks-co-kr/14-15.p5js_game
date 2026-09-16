@@ -1,0 +1,96 @@
+// [본문 코드] 마우스가 원형 객체 안에 들어가면 원형 링 생성 및 증가, 사각형 객체 안에 들어가면 사각형 링 생성 및 증가
+
+let c, s;
+
+function setup() {
+  createCanvas(500, 500);
+  c = new Circle(color(255, 255, 0), width/2, 200, 50, 1, false);	// c 객체 생성
+  s = new Square(color(255, 255, 0), width/2, 300, 50, 1, false);	// s 객체 생성
+}
+
+function draw() {
+  background(0);
+  c.display();				// 메소드 호출: 원형 그리기 동작
+  c.move();				// 메소드 호출: 원형 좌우 이동 및 반사
+  c.check(mouseX, mouseY);		// 메소드 호출: 원형 링 생성 및 증가
+  s.display();				// 메소드 호출: 사각형 그리기 동작
+  s.move();				// 메소드 호출: 사각형 상하 이동 및 반사
+  s.check(mouseX, mouseY);		// 메소드 호출: 사각형 링 생성 및 증가
+}
+
+// [클래스 코드]
+
+class Shape {				// 상위 클래스
+  constructor(c, x, y, d, dd, on) {	// 상위 생성자
+    this.c = c;				// 속성: 색상 초기화
+    this.x = x;				// 속성: 색상 초기화
+    this.y = y;				// 속성: y축 위치좌표 초기화
+    this.d = d;				// 속성: 도형 크기 초기화
+    this.dd = dd;			// 속성: 링 크기 초기화
+    this.on = on;			// 속성: 링 생성 여부 초기화
+  }
+  display() {				// 메소드: 문자열 출력
+    fill(this.c);
+    textSize(50);
+    text("Shape", this.x, this.y);
+  }
+  move() {				// 메소드: 마우스가 도형 안에 들어오면 링 크기 증가
+    if (this.on) {			// 마우스가 도형 안에 위치한 경우
+      this.dd++;			// 링 크기 증가
+    }
+  }
+}
+
+class Circle extends Shape {		// 하위 클래스로서 상위 클래스 상속
+  constructor(c, x, y, d, dd, on) {	// 하위 생성자 (→생략 가능)
+    super(c, x, y, d, dd, on);		// 상위 생성자 호출
+  }
+  display() {				// 메소드 오버라이딩: 원형 또는 원형 링 그리기
+    fill(this.c);
+    ellipse(this.x, this.y, this.d, this.d);
+    if (this.on) {			// 원형 링 그리기
+      noFill();
+      stroke(255, 255, 0);
+      strokeWeight(3);
+      ellipse(this.x, this.y, this.dd, this.dd);
+    }
+  }
+  check(xx, yy) {			// 메소드: 마우스가 원형 안에 있는지 여부 판단
+    let distance = dist(this.x, this.y, xx, yy);
+    if (distance < this.d/2) {		// 마우스가 원형 안에 위치한 경우
+      this.on = true;
+      this.c = color(255, 0, 0);
+    } else {				// 마우스가 원형 밖에 위치한 경우
+      this.on = false;
+      this.c = color(255, 255, 0);
+      this.dd = 1;
+    }
+  }
+}
+
+class Square extends Shape {		// 하위 클래스(Square): 상위 클래스(Shape) 상속
+  constructor(c, x, y, d, dd, on) {	// 하위 생성자 (→생략 가능)
+    super(c, x, y, d, dd, on);		// 상위 생성자 호출
+  }
+  display() {				// 메소드 오버라이딩: 사각형 또는 사각형 링 그리기
+    fill(this.c);
+    rectMode(CENTER);		// 사각형의 정가운데를 기준으로 폭과 높이 설정
+    rect(this.x, this.y, this.d, this.d);
+    if (this.on) {			// 사각형 링 그리기
+      noFill();
+      stroke(255, 255, 0);
+      strokeWeight(3);
+      rect(this.x, this.y, this.dd, this.dd);
+    }
+  }
+  check(xx, yy) {			// 메소드: 마우스가 사각형 안에 있는지 여부 판단
+    if ((this.x-this.d/2 < xx) && (this.x+this.d/2 > xx) && (this.y-this.d/2 < yy) && (this.y+this.d/2 > yy)) {		// 마우스가 사각형 안에 위치한 경우
+      this.on = true;
+      this.c = color(255, 0, 0);
+    } else {				// 마우스가 사각형 밖에 위치한 경우
+      this.on = false;
+      this.c = color(255, 255, 0);
+      this.dd = 1;
+    }
+  }
+}

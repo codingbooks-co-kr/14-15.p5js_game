@@ -1,0 +1,40 @@
+// 다섯 개의 원 좌우 반사 (클래스 미사용)
+
+let num = 5;				// 원의 개수
+let col = [];				// 원의 색상
+let x = [];       			// 원의 x축 위치좌표
+let y = [];      			// 원의 y축 위치좌표
+let d = [];      			// 원의 크기
+let speed = [];				// 원의 속도
+
+function setup() {
+  createCanvas(500, 500);
+  for (let i = 0; i < num; i++) {	// 각 원의 속성별 초기화
+    col[i] = color(random(255), random(255), random(255));	// 원의 색상 랜덤 초기화
+    x[i] = random(width);		// 원의 x축 위치좌표 랜덤 초기화
+    y[i] = random(height);		// 원의 y축 위치좌표 랜덤 초기화
+    d[i] = random(20, 60);		// 원의 크기 랜덤 초기화
+    speed[i] = random(-3, 3);		// 원의 속도 랜덤 초기화
+  }
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+  for (let i = 0; i < num; i++) { 
+    display(i);				// 함수 호출: 원 그리기 동작
+    move(i);				// 함수 호출: 원 좌우 반사 동작
+  }
+}
+
+function display(i) {    		// 함수: 원 그리기 동작
+  noStroke();				// 페이딩 효과를 위해 이동체의 외곽선 제거
+  fill(col[i]);
+  ellipse(x[i], y[i], d[i], d[i]);
+}
+
+function move(i) {      		// 함수: 원 좌우 반사 동작
+  x[i] += speed[i];			// x축 속도 누적 → x축 거리 이동
+  if (x[i] < 0 || x[i] > width) {		// 캔버스의 좌우 경계에서 충돌하는 경우
+    speed[i] *= -1;			// 속도의 방향 반전, 즉 반사
+  }
+}

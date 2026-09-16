@@ -1,0 +1,19 @@
+// 마우스를 누른 위치 좌표에 원 생성
+
+let x = 0, y = 0, d = 50;
+
+function setup() {
+  createCanvas(500, 500);
+  background(0);
+}
+
+function draw() {
+  noStroke();
+  fill(255, 255, 0);
+  ellipse(x, y, d, d);			// 마우스를 누른 위치 좌표 (x,y)에 원 표시
+}
+
+function mousePressed() {		// 마우스를 누를 때 한 번 실행
+  x = mouseX;			// 현재 마우스의 x좌표를 변수 x에 저장
+  y = mouseY;			// 현재 마우스의 y좌표를 변수 y에 저장
+}

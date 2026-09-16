@@ -1,0 +1,21 @@
+// 오른쪽으로 이동하는 10개의 원을 생성하고 초기 위치 및 속도를 랜덤 설정
+
+let num = 10;
+let x = [], y = [], speed = [];
+
+function setup() {
+  createCanvas(500, 300);
+  for (let i = 0; i < num; i++) {	// 배열요소의 초기값 설정
+    x[i] = random(width);		// x축 좌표 초기 위치 랜덤 설정
+    y[i] = random(height);		// y축 좌표 초기 위치 랜덤 설정
+    speed[i] = random(0.5, 5);	// 속도 랜덤 설정
+  }
+}
+
+function draw() {
+  background(0);
+  for (let i = 0; i < num; i++) {
+    ellipse(x[i], y[i], 30, 30);
+    x[i] += speed[i];			// x축 속도(부호: 방향성) 누적 → x축 거리 이동
+  }
+}

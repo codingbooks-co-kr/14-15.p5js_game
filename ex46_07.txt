@@ -1,0 +1,19 @@
+// 서보모터 각도 제어
+
+#include <Servo.h>		// Servo 클래스가 선언된 헤더파일 가져오기
+#define SERVO A0
+Servo servo;			// Servo 클래스를 이용한 객체(servo)의 선언 및 생성
+
+void setup() {
+  pinMode(SERVO, OUTPUT);	// 서보모터핀을 출력으로 사용
+  servo.attach(SERVO);		// servo 객체에 SERVO핀(A0) 연결
+}
+
+void loop() {
+  servo.write(0);		// 0도 설정
+  delay(2000);
+  servo.write(90);		// 90도 설정
+  delay(2000);
+  servo.write(180);		// 180도 설정
+  delay(2000);
+}

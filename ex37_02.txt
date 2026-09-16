@@ -1,0 +1,50 @@
+// 2단계: 스페이스 키로 낙하하는 플레이어 점프
+
+let player;
+
+function setup() {
+  createCanvas(300, 300);
+  player = new Player();		// 플레이어 객체 생성 및 초기화
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+
+  player.display();			// 플레이어 객체 표시
+  player.move();			// 플레이어 객체 이동
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') player.jump();	// 스페이스 키를 누르면 점프
+}
+
+class Player {				// 플레이어 클래스 
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.x = width / 2;			// 플레이어 x축 좌표 초기화
+    this.y = height / 2;		// 플레이어 y축 좌표 초기화
+    this.size = 40;			// 플레이어 크기 초기화
+    this.speed = 0;			// 플레이어 속도 초기화
+    this.gravity = 0.2;			// 플레이어 중력가속도 초기화
+    this.jumpPower = -6;		// 플레이어 점프파워 초기화
+  }
+  display() {				// 메소드: 플레이어 객체 표시
+    noStroke();				// 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(0, 255, 0);
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+  jump() {				// 메소드: 플레이어 객체 점프
+    this.speed += this.jumpPower;	// 속도에 점프파워(–6) 누적 → 위쪽 점프
+  }
+  move() {				// 메소드: 플레이어 객체 이동
+    this.speed += this.gravity;		// y축 속도에 중력 누적 → y축 가속
+    this.y += this.speed;		// y축 속도 누적 → y축 가속 낙하
+    if (this.y > height-this.size/2) {	// 낙하 후 캔버스 최하단 경계에 닿은 경우
+      this.y = height - this.size/2;	// y축 좌표는 캔버스 바닥상에 위치
+      this.speed = 0;			// 속도에 중력가속도가 누적되지 않도록 0으로 초기화 
+    }
+    if (this.y < this.size/2) {		// 점프 후 캔버스 최상단 경계에 닿은 경우
+      this.y = this.size / 2;		// y축 좌표는 캔버스 최상단
+      this.speed = 0;			// 속도에 점프파워가 누적되지 않도록 0으로 초기화 
+    }
+  }
+}

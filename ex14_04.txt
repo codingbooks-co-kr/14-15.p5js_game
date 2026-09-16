@@ -1,0 +1,116 @@
+// 완성: 랜덤 위치에서 접근하는 장애물을 뛰어넘으면 점수 상승, 5점을 획득하면 다음 단계로 이동하고 장애물의 속도 상승, 충돌하면 게임 종료, ‘r’키를 누르면 재시작
+
+let clapSound, jumpSound, burstSound, burstImg, cosmosImg, obstacleImg, playerImg, score;
+let obstacleX, obstacleY, playerX, playerY, obstacleSpeed, playerSpeed;
+let obstacleSize, playerSize, gravity, jumpPower, jump, previousStage, stage = 1;
+
+function preload() {		// setup() 직전에 호출, 외부 파일의 로딩
+  clapSound = loadSound('data/claps.mp3');
+  jumpSound = loadSound('data/catch.mp3');
+  burstSound = loadSound('data/burst.mp3');
+  burstImg = loadImage('data/burst.png');
+  cosmosImg = loadImage('data/cosmos.jpg');
+  obstacleImg = loadImage('data/circle2.png');
+  playerImg = loadImage('data/rocket2.png');
+}
+
+function setup() {
+  createCanvas(600, 300);
+  reset();				// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  image(cosmosImg, width/2, height/2, width, height);	// 배경 이미지 표시
+
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  text('Stage: ' + stage + ', Score: ' + score, width/2, 30);	// 단계 및 점수 표시
+
+  display();				// 장애물 및 플레이어 이미지 표시
+  playerMove();				// 플레이어 점프
+  obstacleMove();			// 장애물 접근
+  gamePause();				// 게임종료 또는 단계이동
+}
+
+function display() {			// 장애물 및 플레이어 이미지 표시
+  image(obstacleImg, obstacleX, obstacleY, obstacleSize, obstacleSize);	// 장애물
+  image(playerImg, playerX, playerY,playerSize, playerSize);			// 플레이어
+}
+
+function playerMove() {				// 플레이어 점프
+  playerSpeed += gravity;			// 속도에 중력 누적 → 낙하 시 가속
+  playerY += playerSpeed;			// y축 속도 누적 → y축 거리 이동
+
+  if (playerY > height - playerSize/2) {  	// 플레이어가 캔버스 바닥에 닿은 경우
+    playerY = height - playerSize/2;		// 플레이어를 캔버스 바닥에 위치시킴
+    playerSpeed = 0;				// 속도는 지속 증가하므로 0으로 초기화
+    jump = false;				// 플레이어가 바닥에 있을 때 점프 가능
+  }
+}
+
+function obstacleMove() {			// 장애물 접근
+  obstacleX -= obstacleSpeed;			// 장애물이 왼쪽으로 이동
+  if (obstacleX + obstacleSize/2 < 0) {		// 장애물이 왼쪽으로 사라지는 경우
+    obstacleX = random(width/2, width);	// 장애물이 캔버스 오른쪽 랜덤 위치에서 생성
+    score++;					// 점수 증가(→장애물을 점프한 것으로 판단)
+  }
+}
+
+function gamePause() { 			// 게임종료 또는 단계이동
+  let distance = dist(obstacleX, obstacleY, playerX, playerY);
+  if (distance < (obstacleSize + playerSize) / 2) {	// 장애물과 플레이어 충돌
+    burstSound.play();					// 효과음 재생
+    image(burstImg, playerX, playerY, playerSize*2, playerSize*2);	// 폭발 이미지 표시
+
+    fill(255);
+    text('GAME OVER', width/2, height/2);
+
+    stage = 1;				// 1단계
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+
+  if (score >= 5) {			// 최소 5점을 획득한 경우 단계 이동
+    clapSound.play();			// 효과음 재생
+    fill(255);
+    text('YOU WIN', width/2, height/2 - 30);
+    text('Hit the r key to start next stage', width/2, height/2 + 30);
+
+    stage++;				// 단계 증가
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === 'r') {			// 'r' 키를 누르면 게임 초기화, 재실행
+    reset();				// 게임 종료 시: 게임 초기화
+    loop();				// draw() 함수의 무한 반복 실행
+  } else if (key === ' ' && !jump) {	// 스페이스 키를 누르면 한 번 점프
+    jumpSound.play();			// 효과음 재생
+    playerSpeed = jumpPower;		// 점프 속도는 –10, 즉 윗방향으로 점프
+    jump = true;			// 플레이어가 점프한 상태에서는 재점프 불가능
+  }
+}
+
+function reset() {				// 게임 초기화
+  obstacleSize = 50;				// 장애물 크기 초기화
+  obstacleX = random(width/2, width);		// 장애물 x축 좌표 초기화(랜덤 설정)
+  obstacleY = height - obstacleSize/2;	// 장애물 y축 좌표 초기화
+  playerSize = 50;				// 플레이어 크기 초기화
+  playerX = 50;				// 플레이어 x축 좌표 초기화
+  playerY = height - playerSize/2;		// 플레이어 y축 좌표 초기화
+  playerSpeed = 0;				// 플레이어 속도 초기화
+  gravity = 0.6;					// 중력가속도 초기화
+  jumpPower = -10;				// 점프 파워 초기화
+  jump = false;					// 점프 가능 여부 초기화
+  score = 0;					// 점수 초기화
+
+  if (stage === 1) {					// 1단계인 경우
+    obstacleSpeed = 5;				// 장애물 속도 초기화
+  } else if (stage > 1 && stage !== previousStage) {	// 2단계 이상인 경우
+    obstacleSpeed++;					// 장애물 속도 증가
+    if (obstacleSpeed > 10) obstacleSpeed = 10;	// 장애물 최대 속도: 10
+  }
+  previousStage = stage;		// 2단계 이상에서 동일 단계는 한 번만 처리
+  imageMode(CENTER);		// 이미지 정렬 모드: 이미지의 가운데에서 폭/높이 설정
+}

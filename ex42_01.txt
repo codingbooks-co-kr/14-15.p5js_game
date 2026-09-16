@@ -1,0 +1,43 @@
+// 1단계: 마우스 드래그로 직사각형 플랫폼 생성, 스페이스 키를 누르면 초기화
+
+let platforms = [];
+
+function setup() {
+  createCanvas(500, 300);
+}
+
+function draw() {
+  background(0);
+  for (let i = 0; i < platforms.length; i++) {
+    platforms[i].display();		// 플랫폼 객체 표시
+  }
+}
+
+function mousePressed() {		// 마우스를 누를 때 플랫폼의 x, y 값 설정
+  let platform = new Platform(mouseX, mouseY, 0, 0);	// platform 객체 생성/초기화
+  platforms.push(platform);		// platforms 배열 끝에 platform 객체 추가
+}
+
+function mouseDragged() {		// 마우스를 드래그할 때 플랫폼의 w, h 값 설정
+  let platform = platforms[platforms.length-1];		// platform은 객체 배열의 끝 요소
+  platform.w = 200;			// platform 객체의 폭 변경(0→200)
+  platform.h = 20;			// platform 객체의 높이 변경(0→20)
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') platforms = [];	// 스페이스키를 누르면 platforms를 빈 배열로 초기화 
+}
+
+class Platform {			// 플랫폼 클래스 
+  constructor(x, y, w, h) {		// 생성자: 속성 추가 및 초기화
+    this.x = x;				// 플랫폼 x좌표 초기화
+    this.y = y;				// 플랫폼 y좌표 초기화
+    this.w = w;			// 플랫폼 폭 초기화
+    this.h = h;				// 플랫폼 높이 초기화
+  }
+  display() {				// 메소드: 플랫폼 객체 표시
+    noStroke();
+    fill(255, 255, 0, 200);
+    rect(this.x, this.y, this.w, this.h);
+  }
+}

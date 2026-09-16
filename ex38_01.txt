@@ -1,0 +1,52 @@
+// 1단계: 방향키로 플레이어를 격자(grid) 단위로 이동하면서 최상단 라인에 도착하면 게임 종료
+
+let player, gridSize = 50;
+
+function setup() {
+  createCanvas(600, 500);
+  player = new Player(gridSize);		// 플레이어 객체 생성 및 초기화
+}
+
+function draw() {
+  background(0, 10);				// 페이딩 효과 (투명도 10 부여)
+
+  fill(0, 255, 255);
+  rect(0, 0, width, gridSize);			// 도착 라인 (row10)
+  rect(0, height - gridSize, width, gridSize);	// 출발 라인 (row1)
+  
+  player.display();				// 플레이어 객체 표시
+
+  if (player.y < height - gridSize*9) {		// 플레이어가 캔버스의 최상단에 도착한 경우
+    fill(255);
+    textSize(30);
+    textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+    text('YOU WIN', width/2, height/2);
+  }
+}
+
+// 방향키를 누를 때마다 격자(grid) 단위로 한 칸 이동
+function keyPressed() {				// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (keyIsDown(LEFT_ARROW)) player.move(-1, 0);	// 한 격자(grid)씩 왼쪽 이동
+  if (keyIsDown(RIGHT_ARROW)) player.move(1, 0);	// 한 격자(grid)씩 오른쪽 이동
+  if (keyIsDown(UP_ARROW)) player.move(0, -1);	// 한 격자(grid)씩 위쪽 이동
+  if (keyIsDown(DOWN_ARROW)) player.move(0, 1);	// 한 격자(grid)씩 아래쪽 이동
+}
+
+class Player {				// 플레이어 클래스 
+  constructor(gridSize) {		// 생성자: 속성 추가 및 초기화
+    this.x = width / 2;		// 플레이어 x좌표 초기화
+    this.y = height - gridSize;		// 플레이어 y좌표 초기화
+    this.size = gridSize;		// 플레이어 크기 초기화
+    this.speed = gridSize;		// 플레이어 속도 초기화
+  }
+  display() {				// 메소드: 플레이어 객체 표시
+    fill(0, 255, 0);
+    rect(this.x, this.y, this.size, this.size);
+  }
+  move(turnX, turnY) {			// 메소드: 플레이어 객체 이동
+    this.x += this.speed * turnX;	// x축 속도 누적 → x축 거리 이동 (turnX: 방향성)
+    this.y += this.speed * turnY;	// y축 속도 누적 → y축 거리 이동 (turnY: 방향성)
+    this.x = constrain(this.x, 0, width-this.size);	// x축 이동 제한
+    this.y = constrain(this.y, 0, height-this.size);	// y축 이동 제한
+  }
+}

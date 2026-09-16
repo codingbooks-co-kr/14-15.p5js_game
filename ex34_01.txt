@@ -1,0 +1,51 @@
+// 1단계: 마우스의 현재 위치 방향을 추적하는 플레이어(→항상 캔버스 중앙에 위치)
+
+let player;
+
+function setup() {
+  createCanvas(600, 600);
+  player = new Player();		// 플레이어 객체 생성 및 초기화
+}
+
+function draw() {
+  background(0);
+
+  noStroke();
+  fill(255);
+  textSize(50);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  text('x: ' + int(player.x) + ' y: ' + int(player.y), width/2, 50);
+
+  ellipse(mouseX, mouseY, 20, 20);	// 마우스의 현재 위치좌표
+
+  translate(width/2 - player.x, height/2 - player.y);		// 캔버스 좌표 이동
+  player.display();			// 플레이어 객체 표시
+  player.move(mouseX, mouseY);	// 플레이어 객체는 마우스 방향으로 이동
+
+  stroke(255, 0, 0);
+  ellipse(0, 0, 100, 100);		// 목표물
+}
+
+class Player {				// 플레이어 클래스 
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.x = 0;				// 플레이어 x축 좌표 초기화
+    this.y = 0;				// 플레이어 y축 좌표 초기화
+    this.size = 50;			// 플레이어 크기 초기화
+    this.speed = 3;			// 플레이어 속도 초기화
+  }
+  display() {				// 메소드: 플레이어 객체 표시
+    stroke(0, 255, 0);
+    strokeWeight(5);
+    noFill();
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+  move(x, y) {				// 메소드: 플레이어 객체의 마우스 추적(→32.1절 참조)
+    let distance = dist(width/2, height/2, x, y);	   // 플레이어∼마우스 거리
+    let dx = (x - width/2) / distance;		// dx가 +이면 마우스가 오른쪽 위치(-:반대)
+    let dy = (y - height/2) / distance;	// dy가 +이면 마우스가 아래쪽 위치(-:반대)
+    dx *= this.speed;			// 플레이어 x축 속도 
+    dy *= this.speed;			// 플레이어 y축 속도 
+    this.x += dx;			// dx가 +이면 오른쪽 이동, -이면 왼쪽 이동
+    this.y += dy; 			// dy가 +이면 아래쪽 이동, -이면 위쪽 이동
+  }
+}

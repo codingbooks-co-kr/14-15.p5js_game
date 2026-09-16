@@ -1,0 +1,18 @@
+// 마우스가 원 내부로 들어오면 원의 색상 변경
+
+let x = 150, y = 150, d = 200;
+
+function setup() {
+  createCanvas(300, 300);
+}
+
+function draw() {
+  background(0);
+  let distance = dist(x, y, mouseX, mouseY);
+  if (distance < d/2) {		// 마우스가 원 안으로 들어올 때
+    fill(255, 0, 0);
+  } else {			// 마우스가 원 밖으로 나갈 때
+    fill(0, 255, 0);
+  }
+  ellipse(x, y, d, d);
+}

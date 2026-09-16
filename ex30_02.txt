@@ -1,0 +1,42 @@
+// 2단계: 8개의 직사각형 적 객체 낙하
+
+let enemies = [], enemyNum = 8;
+
+function setup() {
+  createCanvas(400, 600);
+  let spacing = width / enemyNum;			// 적 객체 사이의 간격
+  for (let i = 0; i < enemyNum; i++) {
+    enemies[i] = new Enemy(i*spacing+10);		// 적 객체 생성 및 초기화
+  }
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+
+  for (let i = 0; i < enemies.length; i++) {
+    enemies[i].display();		// 적 객체 표시
+    enemies[i].move();			// 적 객체 이동
+  }
+}
+
+class Enemy {				// 적 클래스
+  constructor(x) {			// 생성자: 속성 추가 및 초기화
+    this.x = x;				// 적 x축 좌표 초기화
+    this.y = 0;				// 적 y축 좌표 초기화
+    this.w = 30;			// 적 폭 초기화
+    this.h = 60;			// 적 높이 초기화
+    this.speed = random(1, 6);	// 적 속도 초기화(랜덤)
+  }
+  display() {				// 메소드: 적 객체 표시
+    noStroke();				// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(255);
+    rect(this.x, this.y, this.w, this.h);
+  }
+  move() {				// 메소드: 적 객체 낙하
+    this.y += this.speed;		// y축 속도 누적 → y축 거리 이동 (부호: 방향성)
+    if (this.y > height) {		// 적 객체가 캔버스 화면 바닥을 벗어나는 경우
+      this.y = -this.h;			// 다시 캔버스 화면 위쪽에서 시작
+      this.speed = random(1, 6);	// 낙하 속도 랜덤 초기화
+    }
+  }
+}

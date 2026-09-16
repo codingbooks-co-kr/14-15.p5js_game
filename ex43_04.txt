@@ -1,0 +1,105 @@
+// 4단계: 방향키로 플레이어 점프, 좌우 이동하면서 왼쪽으로 이동하는 플랫폼 위에 안착 제어
+
+let player, platforms;
+
+function setup() {
+  createCanvas(700, 300);
+  player = new Player();			// 플레이어 객체 생성 및 초기화
+  platforms = [];				// 플랫폼: 빈 객체 배열로 초기화
+}
+
+function draw() {
+  background(0);
+
+  player.display();				// 플레이어 객체 표시
+  player.update();				// 플레이어 객체 갱신
+
+  if (frameCount % 60 === 0) {		// 1초마다 플랫폼 객체 생성
+    let platform = new Platform();		// 플랫폼 객체 생성 및 초기화
+    platforms.push(platform); 			// platforms 배열 끝에 platform 객체 추가
+  }
+
+  for (let i = platforms.length-1; i >= 0; i--) {	// 역순 반복 처리: [참고20.1] 참조
+    platforms[i].display();			// 플랫폼 객체 표시
+    platforms[i].move();				// 플랫폼 객체 이동
+    player.onPlatform(platforms[i]);	// 플레이어가 플랫폼 위에 안착했는지 여부 판단
+    if (platforms[i].offCanvas()) {	// 플랫폼이 캔버스에서 사라지면 배열에서 제거
+      platforms.splice(i, 1); 		// platforms[i]를 배열에서 삭제
+    }
+  }
+
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    player.move(-1);			// 플레이어 객체 왼쪽 이동
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    player.move(1);			// 플레이어 객체 오른쪽 이동
+  }
+  if (keyIsDown(UP_ARROW)) {	// 위쪽 방향키를 누른 경우
+    player.jump();			// 플레이어 객체 제자리 점프
+  }
+}
+
+class Platform {			// 플랫폼 클래스
+  constructor(x, y, w, h) {		// 생성자: 속성 추가 및 초기화
+    this.x = width;			// 플랫폼 x좌표 초기화
+    this.y = 200;			// 플랫폼 x좌표 초기화
+    this.w = random(50, 250);		// 플랫폼 폭 초기화(랜덤)
+    this.h = 20;			// 플랫폼 높이 초기화
+    this.speed = 5;			// 플랫폼 속도 초기화
+  }
+  display() {				// 메소드: 플랫폼 객체 표시
+    noStroke();
+    fill(255, 200);
+    rect(this.x, this.y, this.w, this.h);
+  }
+  move() {				// 메소드: 플랫폼 객체 이동
+    this.x -= this.speed;		// 메소드: 플랫폼이 왼쪽으로 이동
+  }
+  offCanvas() {				// 메소드: 플랫폼이 왼쪽으로 완전히 사라졌는지 판단
+    if (this.x < -this.w) return true;	// 플랫폼이 캔버스의 왼쪽 경계를 벗어나면 true 반환
+    else return false;			// 플랫폼이 캔버스상에서 이동 중인 경우 false 반환
+  }
+}
+
+class Player {				// 플레이어 클래스 
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.x = 50;			// 플레이어 x좌표 초기화
+    this.y = height / 2;		// 플레이어 y좌표 초기화
+    this.size = 40;			// 플레이어 크기 초기화
+    this.speedX = 5;			// 플레이어 x축 속도 초기화
+    this.speedY = 0;			// 플레이어 y축 속도 초기화
+    this.gravity = 0.2;			// 플레이어 중력가속도 초기화
+    this.jumpPower = -7;		// 플레이어 점프파워 초기화
+    this.isJump = false;		// 플레이어 점프 가능 여부 초기화
+  }
+  display() {				// 플레이어 객체 표시
+    fill(0, 255, 0);
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+  update() {				// 메소드: 플레이어 객체 갱신
+    this.speedY += this.gravity;	// 메소드: y축 속도에 중력 누적 → y축 가속
+    this.y += this.speedY;		// y축 속도 누적 → y축 거리 이동
+    if (this.y > height - this.size/2) {	// 플레이어가 캔버스 바닥에 안착한 경우
+      this.y = height - this.size/2;	// y축 좌표는 캔버스 바닥상에 위치
+      this.speedY = 0;			// 속도에 중력가속도가 누적되지 않도록 0으로 초기화 
+      this.isJump = false;		// 플레이어가 바닥에 안착 중(이므로 점프 가능)
+    }
+  }
+  move(turn) {				// 메소드: 플레이어 객체 이동
+    this.x += this.speedX * turn;	// x축 속도 누적 → x축 거리 이동 (turn: 방향성)
+    this.x = constrain(this.x, this.size/2, width - this.size/2);		// x축 이동 제한
+  }
+  jump() {				// 메소드: 플레이어 객체 점프
+    if (!this.isJump) {			// 플레이어가 안착해 있는 경우(=점프하지 않은 상태)
+      this.speedY = this.jumpPower;	// y축 속도는 –7(점프파워) → 위쪽으로 점프
+      this.isJump = true;		// 플레이어가 점프 중(이므로 다중 점프 불가능)
+    }
+  }
+  onPlatform(other) {			// 메소드: 플레이어가 플랫폼상에 안착한 경우
+    if (this.x > other.x && this.x < other.x + other.w && this.y > other.y - this.size/2 && this.y < other.y + other.h - this.size/2) {
+      this.y = other.y - this.size/2;	// y축 좌표는 플랫폼상에 위치
+      this.speedY = 0;			// 속도에 중력가속도가 누적되지 않도록 0으로 초기화 
+      this.isJump = false;		// 플레이어가 플랫폼상에 안착 중(이므로 점프 가능)
+    }
+  }
+}

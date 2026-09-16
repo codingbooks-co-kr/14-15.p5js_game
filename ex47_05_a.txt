@@ -1,0 +1,25 @@
+// 아두이노: 가변저항값 두 개 송신
+
+#define VARIABLE_R1 A1		// 가변저항1 핀번호: A1
+#define VARIABLE_R2 A2		// 가변저항2 핀번호: A2
+
+void setup() {
+  pinMode(VARIABLE_R1, INPUT);	// 가변저항핀1을 입력으로 사용
+  pinMode(VARIABLE_R2, INPUT);	// 가변저항핀2를 입력으로 사용
+  Serial.begin(9600);			// 전송속도: 9,600bps
+  while (Serial.available() == 0) {	// 수신버퍼에 수신값이 없는 동안 반복 실행
+    Serial.println('A');			// [참고47.7] 시작신호('A') 전송(→'A'+'\n'(개행) 전송)
+    delay(300);				// 0.3초 대기
+  }
+}
+
+void loop( ) { }
+
+void serialEvent() {				// 이벤트함수: 수신값이 있으면 자동 호출
+  int signal = Serial.read();			// 수신: 통신제어신호('B')
+  int value1 = analogRead(VARIABLE_R1);	// 10비트의 가변저항1 값 읽기
+  int value2 = analogRead(VARIABLE_R2);	// 10비트의 가변저항2 값 읽기
+  Serial.print(value1);				// 첫 번째 가변저항값
+  Serial.print(",");				// 가변저항값 사이를 구분하는 콤마(,)
+  Serial.println(value2);				// 송신 최종문자열: “value1,value2\n“
+}

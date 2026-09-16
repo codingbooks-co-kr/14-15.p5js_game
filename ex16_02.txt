@@ -1,0 +1,23 @@
+// 2단계: (중력)가속도와 (감쇄)마찰율을 사용하여 낙하, 반사 및 감쇄하는 볼
+
+let ballX = 150, ballY = 0, ballSize = 30, speed = 0, gravity = 0.3, friction = 0.95;
+
+function setup() {
+  createCanvas(300, 300);
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+  
+  noStroke();				// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+  fill(255);
+  ellipse(ballX, ballY, ballSize, ballSize);	// 볼 표시
+
+  speed += gravity;			// 속도에 중력 누적 → 낙하 시 가속
+  ballY += speed;			// y축 속도 누적 → y축 거리 이동
+  if (ballY > height - ballSize/2) {	// 볼이 캔버스 바닥에 닿은 경우
+    ballY = height - ballSize/2;	// ballY 위치: 캔버스 바닥(→[참고16.1] 참조)
+    speed *= -1;			// (부호를 양수에서 음수로 바꾸어) 반사 적용
+    speed *= friction;			// 속도에 마찰율 누적 → 속도 감소
+  }
+}

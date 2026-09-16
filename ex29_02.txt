@@ -1,0 +1,57 @@
+// 2단계: 마우스로 랜덤 방향 및 속도로 이동하는 목표물을 맞추면 소멸
+
+let targets = [];				// (객체 배열을 위한) 변수 선언 및 빈 배열 생성
+
+function setup() {
+  createCanvas(600, 600);
+  for (let i = 0; i < 10; i++) {
+    targets[i] = new Target(); 		// 목표물 객체 생성 및 초기화
+  }
+}
+
+function draw() {
+  background(0);
+  if (targets.length === 0) {		// 목표물 객체가 모두 소멸한 경우
+    fill(255);
+    textSize(50);
+    textAlign(CENTER, CENTER);	// 문자열 가운데 정렬
+    text('YOU WIN', width/2, height/2);
+  }
+
+  for (let i = targets.length-1; i >= 0; i--) {		// 역순 반복 처리: [참고20.1] 참조
+    targets[i].display();			// 목표물 객체 표시
+    targets[i].move();			// 목표물 객체 이동
+    if (mouseIsPressed && targets[i].hit(mouseX, mouseY)) {	 // 마우스로 목표물 맞추면
+      targets.splice(i, 1);		// targets[i]를 배열에서 삭제
+    }
+  }
+}
+
+class Target {						// 목표물 클래스
+  constructor() {					// 생성자: 속성 추가 및 초기화
+    this.size = random(20, 60);			// 크기 초기화(랜덤)
+    this.x = random(this.size/2, width-this.size/2);	// x축 좌표 초기화(랜덤)
+    this.y = random(this.size/2, height-this.size/2);	// y축 좌표 초기화(랜덤)
+    this.speedX = random(-3, 3);			// x축 속도 초기화(랜덤)
+    this.speedY = random(-3, 3);			// y축 속도 초기화(랜덤)
+  }
+  display() {						// 메소드: 목표물 객체 표시
+    fill(255, 200);
+    ellipse(this.x, this.y, this.size, this.size);		// 목표물 표시
+  }
+  move() {					// 메소드: 목표물 객체 이동 및 반사
+    this.x += this.speedX;   			// x축 속도 누적 → x축 거리 이동
+    this.y += this.speedY; 			// y축 속도 누적 → y축 거리 이동
+    if (this.x < this.size/2 || this.x > width - this.size/2) {	// x축 경계 반사조건
+      this.speedX *= -1;			// 속도의 방향 반전, 즉 반사
+    }
+    if (this.y < this.size/2 || this.y > height - this.size/2) {	// y축 경계 반사조건
+      this.speedY *= -1;			// 속도의 방향 반전, 즉 반사
+    }
+  }
+  hit(x, y) {					// 메소드: 목표물∼마우스 충돌 여부 확인
+    let distance = dist(x, y, this.x, this.y);	// 목표물∼마우스 거리 측정
+    if (distance < this.size/2) return true;	// (목표물∼마우스 사이) 충돌하면 true 반환
+    else return false;				// 충돌하지 않으면 false 반환
+  }
+}

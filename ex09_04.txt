@@ -1,0 +1,44 @@
+// 4단계: 낙하하는 목표물이 캔버스를 벗어나면 게임 종료, 스페이스키를 누르면 재시작
+
+let targetX, targetY;			// 실행 중 값이 변하는(=갱신되는) 전역변수
+let targetSize, targetSpeed;		// 실행 중 값이 변하지 않는 전역변수
+
+function setup() {
+  createCanvas(300, 200);
+  reset();				// 게임 초기화
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+  display();					// 낙하하는 목표물
+  
+  targetY += targetSpeed;		// y축 속도 누적 → 낙하
+  if (targetY > height) {		// 목표물이 캔버스 바닥을 벗어난 경우
+    fill(255);
+    textSize(20);
+    textAlign(CENTER, CENTER);	// 문자열 가운데 정렬
+    text('GAME OVER', width/2, height/2 - 20);
+    text('Hit the space key to restart', width/2, height/2 + 20);
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function display() {
+  noStroke();
+  fill(255);
+  ellipse(targetX, targetY, targetSize, targetSize);	// 낙하하는 목표물
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {			// 스페이스 키를 누르면 게임 초기화, 재실행
+    reset();				// 게임 초기화
+    loop();				// draw() 함수의 무한 반복 실행
+  }
+}
+
+function reset() {			// 게임 초기화
+  targetSize = 30;			// 목표물 크기 초기화
+  targetX = random(targetSize/2, width-targetSize/2);		// 목표물 x축 좌표 초기화
+  targetY = 0;							// 목표물 y축 좌표 초기화
+  targetSpeed = 2;			// 목표물 낙하 속도 초기화
+}

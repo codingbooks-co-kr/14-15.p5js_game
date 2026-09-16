@@ -1,0 +1,14 @@
+// 변수를 사용하여 문자 출력
+
+let c1 = 'A', c2 = 'B', c3 = 'C';	// 문자 변수 선언 및 초기화
+let x = 70, y = 70;			// 숫자 변수 선언 및 초기화
+
+function setup() {
+  createCanvas(300, 300);
+  background(200);
+
+  textSize(50);
+  text(c1, x, y);			// 문자 'A' 출력
+  text(c2, x*2, y*2);			// 문자 'B' 출력
+  text(c3, x*3, y*3);			// 문자 'C' 출력
+}

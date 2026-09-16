@@ -1,0 +1,34 @@
+// 1단계: 랜덤하게 섞인 6개의 카드 내용(→하트, 폭탄) 확인
+
+let cards = [], bombIndex, x, y = 60, w = 80, h = 120;
+
+function setup() {
+  createCanvas(600, 240);
+  reset();			// 게임 초기화
+}
+
+function draw() {
+  background(0);
+  
+  for (let i = 0; i < cards.length; i++) {
+    x = i * 100 + 10;
+    fill(0, 255, 0);
+    rect(x, y, w, h);				// 사각형 카드 표시
+
+    if (i === bombIndex) cards[i] = '💣';	// i번 배열요소를 폭탄 이모지()로 대체
+
+    textSize(50);
+    textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+    text(cards[i], x + 40, y + 60);		// 이모지 배열요소 표시
+  }
+}
+
+function mousePressed() {			// 이벤트함수: 마우스를 누르면 한 번 실행
+  reset();					// 게임 초기화
+}
+
+function reset() {				// 게임 초기화
+  cards = ['❤️️', '❤️️', '❤️️', '❤️️', '❤️️', '❤️️'];		// 하트 이모지()로 배열 초기화
+  bombIndex = int(random(cards.length));	// 폭탄 인덱스(0∼5)를 bombIndex에 저장
+  console.log(bombIndex);			// 폭탄 인덱스(0∼5) 확인
+}

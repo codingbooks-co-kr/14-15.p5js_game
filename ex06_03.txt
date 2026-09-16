@@ -1,0 +1,18 @@
+// 원의 가속 이동
+
+let x = 0, y = 0;			// 위치
+let speedX = 0, speedY = 0;		// 속도
+let accelX = 0.2, accelY = 0.2; 	// 가속도
+
+function setup() {
+  createCanvas(400, 400);
+  background(0);
+}
+
+function draw() {
+  ellipse(x, y, 30, 30);
+  speedX += accelX;			// x축 속도에 속도 누적 → x축 가속
+  speedY += accelY;			// y축 속도에 속도 누적 → y축 가속
+  x += speedX;			// x축 속도(부호: 방향성) 누적 → x축 거리 이동
+  y += speedY;			// y축 속도(부호: 방향성) 누적 → y축 거리 이동
+}

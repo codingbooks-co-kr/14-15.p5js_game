@@ -1,0 +1,23 @@
+// 1단계: 마우스를 누를 때마다 랜덤/정지를 반복하고 정지되었을 때 랜덤 주사위값(1∼6) 출력
+
+let dice, stop = false;
+
+function setup() {
+  createCanvas(400, 200);
+}
+
+function draw() {
+  background(0);
+  dice = 1 + int(random(6));		// 랜덤 주사위(dice) 값 범위: 1∼6
+  
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  text('Random Value: ' + dice, width/2, height/2);
+}
+
+function mousePressed() {		// 이벤트함수: 마우스를 누르면 한 번 실행
+  stop = !stop;				// stop값은 true 또는 false로 토글
+  if (stop) noLoop();			// draw() 함수의 반복 실행 일시 정지
+  else loop();				// draw() 함수의 무한 반복 실행
+}

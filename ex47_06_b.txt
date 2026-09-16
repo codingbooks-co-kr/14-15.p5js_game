@@ -1,0 +1,73 @@
+// p5.js: 가변저항값 수신 후 플레이어 좌우 이동 제어, 목표물 획득 여부값 송신
+// 9.3절 “낙하하는 목표물을 잡으면 점수 획득” 참조
+
+let port = new p5.WebSerial();		// 시리얼 통신 객체 생성
+let playerX, playerY, w = 100, h = 20;
+let targetX, targetY, targetSize = 30, targetSpeed = 2, catchTarget = 0, score = 0;
+
+function setup() {
+  createCanvas(600, 400);
+  port.getPorts();			// 포트 사용 가능 여부 확인
+  port.on('noport', makePortButton);	// 기존 선택한 포트가 없으면 makePortButton() 호출
+  port.on('portavailable', openPort);	// 사용 가능한 포트가 있으면 openPort() 자동 호출
+  port.on('data', serialEvent);		// 데이터 수신: ‘data’ 이벤트 발생→serialEvent() 호출
+
+  targetX = random(targetSize/2, width-targetSize/2);		// 목표물 x축 좌표 초기화
+  targetY = 0;							// 목표물 y축 좌표 초기화
+  playerX = 0;
+  playerY = height - h;
+}
+
+function draw() {
+  background(0);
+  
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);				// 문자열 가운데 정렬
+  text('Score: ' + score, width/2, 30);			// 점수 표시
+
+  fill(255);
+  ellipse(targetX, targetY, targetSize, targetSize);	// 목표물 표시
+
+  fill(0, 255, 0);
+  rectMode(CENTER);			// 사각형의 정가운데를 기준으로 폭과 높이 설정
+  rect(playerX, playerY, w, h);		// 플레이어 표시
+  
+  targetY += targetSpeed;		// y축 속도 누적 → y축 낙하
+  if (targetX > playerX-w/2 && targetX < playerX+w/2 && targetY > playerY) {
+    targetX = random(targetSize/2, width-targetSize/2);	// 목표물 x축 좌표 초기화
+    targetY = 0;						// 목표물 y축 좌표 초기화
+    targetSpeed++;			// 낙하 속도 증가 
+    score++;				// 점수 증가
+    catchTarget = 1;			// 목표물 획득
+  } else {
+    catchTarget= 0;			// 목표물 미획득
+  }
+  
+  if (targetY > height) {		// 목표물이 캔버스 바닥을 벗어난 경우
+    fill(255);
+    text('GAME OVER', width/2, height/2);
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function serialEvent() {				// 콜백함수: 수신값이 있으면 자동 호출
+  let value = port.read();			// 수신: 가변저항값(0∼255)
+  playerX = map(value, 0, 255, w/2, width-w/2);	// 플레이어 좌우 이동 범위로 변환
+  port.write(catchTarget);  			// 송신: 목표물획득(0 또는 1)
+}
+
+function makePortButton() {			// 콜백함수: 포트 첫연결 시 포트선택버튼 생성
+  let portButton = createButton('포트 선택');	// 버튼 생성
+  portButton.mousePressed(choosePort);	// 버튼 누르면 choosePort() 자동 호출
+  function choosePort() {			// 콜백함수
+    port.requestPort();				// 시리얼 포트 선택창 오픈
+  }
+}
+
+function openPort() {				// 콜백함수: 포트 오픈
+  port.open().then(initiateSerial);		// 포트를 오픈 후 initiateSerial() 자동 호출
+  function initiateSerial() {			// 콜백함수
+    console.log('포트 오픈');
+  }
+}

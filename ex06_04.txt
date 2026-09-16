@@ -1,0 +1,19 @@
+// 원의 마찰 이동
+
+let x = 0, y = 0;			// 위치
+let speedX = 10, speedY = 10;	// 속도
+let friction = 0.97;			// 마찰율
+
+function setup() {
+  createCanvas(400, 400);
+  background(0);
+}
+
+function draw() {
+  ellipse(x, y, 30, 30);
+  speedX *= friction;			// x축 속도에 마찰율 누적 → x축 속도 감소
+  speedY *= friction;			// y축 속도에 마찰율 누적 → y축 속도 감소
+  x += speedX;			// x축 속도(부호: 방향성) 누적 → x축 거리 이동
+  y += speedY;			// y축 속도(부호: 방향성) 누적 → y축 거리 이동
+  console.log(x + ' : ' + y);		// 움직인 좌표값 확인
+}

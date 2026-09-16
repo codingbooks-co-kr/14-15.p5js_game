@@ -1,0 +1,44 @@
+// 단계3: 6개의 카드를 하나씩 뒤집어 폭탄이 나오면 게임 종료
+
+let cards = [], revealed = [], bombIndex, x, y = 40, w = 80, h = 120;
+
+function setup() {
+  createCanvas(600, 240);
+  cards = ['❓', '❓', '❓', '❓', '❓', '❓'];			// 의문 이모지()로 배열 초기화
+  revealed = [false, false, false, false, false, false];	// false로 배열 초기화
+  bombIndex = int(random(cards.length));		// 폭탄 인덱스를 bombIndex에 저장
+
+  textSize(50);
+  textAlign(CENTER, CENTER);			// 문자열 가운데 정렬
+}
+
+function draw() {
+  background(0);
+  
+  for (let i = 0; i < cards.length; i++) {
+    x = i *100 + 10;
+    fill(0, 255, 0);
+    rect(x, y, w, h);				// 사각형 카드 표시
+    text(cards[i], x + 40, y + 60);		// 이모지 배열요소 표시
+
+    if (revealed[i]) {				// ❷숨겨진 이모지 확인
+      text(cards[i], x + 40, y + 60);		// 숨겨진 이모지(, ) 표시
+      if (i === bombIndex) {			// 숨겨진 이모지가 폭탄인 경우
+        fill(255);
+        text('GAME OVER', width/2, height-50);
+        noLoop();				// draw() 함수의 반복 실행 일시 정지
+      }
+    }
+  }
+}
+
+function mousePressed() {			// 이벤트함수: 마우스를 누르면 한 번 실행
+  for (let i = 0; i < cards.length; i++) {
+    x = i *100 + 10;
+    if (mouseX > x && mouseX < x+w && mouseY > y && mouseY < y+h) {
+      revealed[i] = true;			// ❶숨겨진 이모지 확인 가능
+      if (i === bombIndex) cards[i] = '💣';	// 의문 이모지를 폭탄 이모지()로 대체
+      else cards[i] = '❤️️';			// 의문 이모지를 하트 이모지()로 대체
+    }
+  }
+}

@@ -1,0 +1,25 @@
+// 1단계: 키보드 방향키로 플레이어(라켓) 좌우 이동
+
+let playerX, playerY, playerSpeed = 10, w = 100, h = 30;
+
+function setup() {
+  createCanvas(300, 200);
+  playerX = width / 2;			// 플레이어(라켓) x축 좌표 초기화
+  playerY = height - h;		// 플레이어(라켓) y축 좌표 초기화
+}
+
+function draw() {
+  background(0);
+  
+  fill(0, 255, 0);
+  rectMode(CENTER);			// 사각형의 정가운데를 기준으로 폭과 높이 설정
+  rect(playerX, playerY, w, h);		// 플레이어(라켓) 표시
+  
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    playerX -= playerSpeed;		// x축 속도(-부호: 왼쪽) 누적 → 왼쪽 이동 
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    playerX += playerSpeed;		// x축 속도(+부호: 오른쪽) 누적 → 오른쪽 이동 
+  }
+  playerX = constrain(playerX, w/2, width-w/2);	// 플레이어의 좌우 이동 제한
+}

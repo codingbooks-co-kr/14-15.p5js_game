@@ -1,0 +1,43 @@
+// 3단계: 좌→우로 끊임없이 이동하는 각 5개의 목표물과 적, push() 함수 사용
+
+let targets = [], enemies = [], num = 5;
+
+function setup() {
+  createCanvas(600, 500);
+  for (let i = 0; i < num; i++) {
+    let target = { x: 0, y: random(height), size: random(20, 50), speed: random(2, 7) };
+    targets.push(target);		// 생성된 target 객체를 targets 배열에 추가
+    
+    let enemy = { x: 0, y: random(height), size: random(20, 50), speed: random(2, 7) };
+    enemies.push(enemy);		// 생성된 enemy 객체를 enemies 배열에 추가
+  }
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+
+  noStroke();				// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+  for (let i = 0; i < num; i++) {
+    fill(255);
+    ellipse(targets[i].x, targets[i].y, targets[i].size, targets[i].size);	  // 목표물 표시
+
+    fill(255, 0, 0);
+    ellipse(enemies[i].x, enemies[i].y, enemies[i].size, enemies[i].size);  // 적 표시
+
+    targets[i].x += targets[i].speed;		// 목표물의 x축 속도 누적 → x축 거리 이동 
+    if (targets[i].x > width) {			// 목표물이 캔버스의 오른쪽 경계를 벗어나면 
+      targets[i].x = 0;				// 목표물의 x축 좌표 초기화
+      targets[i].y = random(height);		// 목표물의 y축 좌표 초기화(랜덤)
+      targets[i].size = random(20, 50);		// 목표물의 크기 초기화(랜덤)
+      targets[i].speed = random(2, 7);		// 목표물의 속도 초기화(랜덤)
+    }
+    
+    enemies[i].x += enemies[i].speed;		// 적의 x축 속도 누적 → x축 거리 이동 
+    if (enemies[i].x > width) {			// 적이 캔버스의 오른쪽 경계를 벗어나면
+      enemies[i].x = 0;			// 적의 x축 좌표 초기화
+      enemies[i].y = random(height);		// 적의 y축 좌표 초기화(랜덤)
+      enemies[i].size = random(20, 50);	// 적의 크기 초기화(랜덤)
+      enemies[i].speed = random(2, 7);	// 적의 속도 초기화(랜덤)
+    }
+  }
+}

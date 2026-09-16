@@ -1,0 +1,18 @@
+// 원의 등속 이동-2
+
+let x, y;
+let speedX = 1, speedY = 1;
+
+function setup() {
+  createCanvas(400, 400);
+  background(0);
+  x = width / 2;	// 변수 초기화
+  y = height / 2;	// 변수 초기화
+}
+
+function draw() {
+  ellipse(x, y, 30, 30);
+  x += speedX;	// x 좌표 이동
+  y += speedY;	// y 좌표 이동
+  print(frameCount + ' : ' + frameRate());
+}

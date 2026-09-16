@@ -1,0 +1,15 @@
+// 푸시버튼값 읽고 시리얼 모니터에 출력
+
+#define BUTTON 2
+
+void setup() {
+  pinMode(BUTTON, INPUT);		// 푸시버튼핀을 입력으로 사용
+  Serial.begin(9600);			// 전송속도: 9,600bps
+}
+
+void loop() {
+  int value = digitalRead(BUTTON);	// 푸시버튼값을 읽고 value(지역변수)에 저장 
+  Serial.print("Button: ");
+  Serial.println(value);			// 푸시버튼값을 시리얼 모니터(PC)로 전송
+  delay(100);
+}

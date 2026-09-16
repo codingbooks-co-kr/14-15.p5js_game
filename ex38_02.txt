@@ -1,0 +1,57 @@
+// 2단계: 8라인의 장애물 좌우 이동, 라인별 장애물의 속도는 랜덤, 이동 방향은 교대로 반전
+
+let obstacles = [], gridSize = 50;
+
+function setup() {
+  createCanvas(600, 500);
+
+  let index = 0, rows = 2, turn = 1;		// 지역변수
+
+  // 3×8개의 장애물 객체의 생성 및 초기화
+  for (let i = 0; i < 8; i++) {    		// 라인(row2∼row9), 출발:row1, 도착:row10
+    let speedUp = random(0.5, 3) * turn;	// 라인별 장애물 객체 속도 및 방향(turn)
+    for (let j = 0; j < 3; j++) {			// 라인별 장애물 객체 수는 3개
+      let x = j * 180 + random(50, 100);	// 장애물 객체 x축 좌표
+      let y = height - (gridSize * rows);	// 장애물 객체 y축 좌표
+      obstacles[index] = new Obstacle(x, y, gridSize, speedUp);	// 객체생성,초기화
+      index++;
+    }
+    rows++;					// 장애물 객체의 생성 라인 증가
+    turn *= -1;				// 장애물 객체의 이동 방향 반전
+  }
+}
+
+function draw() {
+  background(0, 10);				// 페이딩 효과 (투명도 10 부여)
+
+  fill(0, 255, 255);
+  rect(0, 0, width, gridSize);			// 도착 라인 (row10)
+  rect(0, height - gridSize, width, gridSize);	// 출발 라인 (row1)
+
+  for (let i = 0; i < obstacles.length; i++) {
+    obstacles[i].display();			// 장애물 객체 표시
+    obstacles[i].move();				// 장애물 객체 이동
+  }
+}
+
+class Obstacle {				// 장애물 클래스	
+  constructor(x, y, gridSize, speedUp) {	// 생성자: 속성 추가 및 초기화
+    this.x = x;					// 장애물 x축 좌표 초기화
+    this.y = y;					// 장애물 y축 좌표 초기화
+    this.size = gridSize;			// 장애물 크기 초기화
+    this.speed = speedUp;			// 장애물 속도 초기화
+  }
+  display() {					// 메소드: 장애물 객체 표시
+    noStroke();					// 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(255, 100);
+    rect(this.x, this.y, this.size, this.size);
+  }
+  move() {					// 메소드: 장애물 객체 이동
+    this.x += this.speed;			// x축속도누적 → x축거리이동 (부호:방향성)
+    if (this.speed > 0 && this.x > width) {	// 장애물이 캔버스 오른쪽 끝에 이르면
+      this.x = -this.size;			// 캔버스 왼쪽에서 이동 시작
+    } else if (this.speed < 0 && this.x < -this.size) {	// 장애물이 캔버스 왼쪽 끝에 이르면
+      this.x = width;				// 캔버스 오른쪽에서 이동 시작
+    }
+  }
+}

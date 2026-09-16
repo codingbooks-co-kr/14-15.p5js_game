@@ -1,0 +1,9 @@
+function setup() {
+  createCanvas(400, 300);
+  background(0);
+}
+
+function draw() {
+  triangle(100, 50, 150, 200, 50, 250);       		// 삼각형 표현
+  quad(200, 50, 300, 100, 350, 200, 250, 250);    	// 사변형 표현
+}

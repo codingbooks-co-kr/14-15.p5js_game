@@ -1,0 +1,28 @@
+// 3단계: 위에서 아래로 끊임없이 낙하하는 10개의 목표물-1
+
+let targets = [], targetNum = 10;
+
+function setup() {
+  createCanvas(500, 600);
+  for (let i = 0; i < targetNum; i++) {
+    let target = { x: random(width), y: 0, size: random(20, 40), speed: random(1, 2) };
+    targets.push(target);		// 생성된 target 객체를 targets 배열에 추가
+  }
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+  
+  noStroke();				// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+  fill(255, 200);
+  for (let i = 0; i < targetNum; i++) {
+    ellipse(targets[i].x, targets[i].y, targets[i].size, targets[i].size);	  // 목표물 표시
+    targets[i].y += targets[i].speed;		// 목표물의 y축 속도 누적 → 아래쪽 이동
+    if (targets[i].y > height) {			// 목표물이 캔버스 바닥을 벗어난 경우
+      targets[i].x = random(width);		// 목표물의 x축 좌표 랜덤 설정: 0∼width
+      targets[i].y = 0;				// 목표물의 y축 좌표 설정: 0
+      targets[i].size = random(20, 40);		// 목표물의 크기 랜덤 설정: 20∼40
+      targets[i].speed = random(1, 2);		// 목표물의 속도 랜덤 설정: 1∼2
+    }
+  }
+}

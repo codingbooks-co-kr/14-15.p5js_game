@@ -1,0 +1,47 @@
+// 1단계: 랜덤 크기의 장애물이 1.5초마다 생성되며 오른쪽→왼쪽으로 이동
+
+let obstacles = [];
+
+function setup() {
+  createCanvas(600, 500);
+  obstacles.push(new Obstacle());	// obstacles 배열 끝에 Obstacle 객체 추가
+}
+
+function draw() {
+  background(0);
+
+  if (frameCount % 90 === 0) {	// 1.5초마다 장애물 추가
+    obstacles.push(new Obstacle()); 	// obstacles 배열 끝에 Obstacle 객체 추가
+  }
+
+  for (let i = obstacles.length-1; i >= 0; i--) {	// 역순 반복 처리: [참고20.1] 참조
+    obstacles[i].display();		// 장애물 객체 표시
+    obstacles[i].move();			// 장애물 객체 이동
+    if (obstacles[i].offCanvas()) {	// 장애물이 캔버스에서 사라지면 배열에서 제거
+      obstacles.splice(i, 1); 		// 장애물 객체 obstacles[i] 삭제
+    }
+  }
+}
+
+class Obstacle {			// 장애물 클래스
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.x = width;			// 장애물 x축 좌표 초기화
+    this.w = 80;			// 장애물 y축 좌표 초기화
+    this.spacing = random(50, 150);			// 상·하단 장애물 간격 초기화(랜덤)
+    this.top = random(height/6, height*3/4);		// 상단 장애물 
+    this.bottom = height - (this.top + this.spacing);	// 하단 장애물 
+    this.speed = 5;					// 장애물 속도 초기화
+  }
+  display() {				// 메소드: 장애물 객체 표시
+    fill(200);
+    rect(this.x, 0, this.w, this.top);				// 상단 사각형 장애물
+    rect(this.x, height-this.bottom, this.w, this.bottom);	// 하단 사각형 장애물
+  }
+  move() {				// 메소드: 장애물 객체 이동
+    this.x -= this.speed;		// 장애물이 왼쪽으로 이동
+  }
+  offCanvas() {				// 메소드: 장애물이 왼쪽으로 완전히 사라졌는지 판단
+    if (this.x < -this.w) return true;	// 장애물이 캔버스의 왼쪽 경계를 벗어나면 true 반환
+    else return false;			// 장애물이 캔버스상에서 이동 중인 경우 false 반환
+  }
+}

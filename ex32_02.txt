@@ -1,0 +1,116 @@
+// 2단계: 방향키로 플레이어를 이동하며 추적하는 적을 피해 목표물 획득
+
+let player, enemy, targets = [], targetNum = 5;
+
+function setup() {
+  createCanvas(600, 600);
+  player = new Player();		// 플레이어 객체 생성 및 초기화
+  enemy = new Enemy();		// 적 객체 생성 및 초기화
+  for (let i = 0; i < targetNum; i++) {
+    targets[i] = new Target();		// 목표물 객체 생성 및 초기화
+  }
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+
+  player.display();			// 플레이어 객체 표시
+
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    player.move(-1, 0);		// 플레이어 객체 왼쪽 이동
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    player.move(1, 0);			// 플레이어 객체 오른쪽 이동
+  }
+  if (keyIsDown(UP_ARROW)) {	// 위쪽 방향키를 누른 경우
+    player.move(0, -1);		// 플레이어 객체 위쪽 이동
+  }
+  if (keyIsDown(DOWN_ARROW)) {	// 아래쪽 방향키를 누른 경우
+    player.move(0, 1);			// 플레이어 객체 아래쪽 이동
+  }
+
+  for (let i = targets.length-1; i >= 0; i--) {	// 역순 반복 처리: [참고20.1] 참조
+    targets[i].display();			// 목표물 객체 표시
+    if (player.hit(targets[i])) {		// 플레이어∼목표물 충돌한 경우
+      targets.splice(i, 1); 		// targets[i]를 배열에서 삭제
+    }
+  }
+
+  if (targets.length === 0) {		// 목표물이 소멸한 경우 게임 종료
+    fill(255);
+    text('YOU WIN', width/2, height/2);
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+
+  enemy.display();			// 적 객체 표시
+  enemy.move(player);			// 적 객체 플레이어 추적
+
+  if (player.hit(enemy)) {		// 플레이어∼적 충돌한 경우
+    fill(255);
+    textSize(30);
+    text('GAME OVER', width/2, height/2);
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+class Target {				// 목표물 클래스
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.x = random(width);		// 목표물 x축 좌표 초기화(랜덤)
+    this.y = random(height);		// 목표물 y축 좌표 초기화(랜덤)
+    this.size = 40;			// 목표물 크기 초기화
+  }
+  display() {				// 메소드: 목표물 객체 표시
+    fill(255);
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+}
+
+class Enemy {				// 적 클래스
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.x = random(width);		// 적 x축 좌표 초기화(랜덤)
+    this.y = random(height);		// 적 y축 좌표 초기화(랜덤)
+    this.size = 40;			// 적 크기 초기화
+    this.speed = random(0.5, 1.5);	// 적 속도 초기화(랜덤)
+  }
+  display() {				// 메소드: 적 객체 표시
+    noStroke();				// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(255, 0, 0);
+    ellipse(this.x, this.y, this.size, this.size);
+  }  
+  move(player) {			// 메소드: 적 객체의 플레이어 추적(→17.1절 참조)
+    let distance = dist(this.x, this.y, player.x, player.y);		// 적∼플레이어 거리
+    let dx = (player.x - this.x) / distance;	// dx가 +이면 player가 오른쪽 위치(-:반대)
+    let dy = (player.y - this.y) / distance;	// dy가 +이면 player가 아래쪽 위치(-:반대)
+    dx *= this.speed;			// 적 x축 속도 
+    dy *= this.speed;			// 적 y축 속도 
+    this.x += dx;			// dx가 +이면 오른쪽 이동, -이면 왼쪽 이동
+    this.y += dy; 			// dy가 +이면 아래쪽 이동, -이면 위쪽 이동
+  }
+}
+
+class Player {				// 플레이어 클래스 
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.x = width / 2;			// 플레이어 x축 좌표 초기화
+    this.y = height / 2;		// 플레이어 y축 좌표 초기화
+    this.size = 40;			// 플레이어 크기 초기화
+    this.speed = 2;			// 플레이어 속도 초기화
+  }
+  display() {				// 메소드: 플레이어 객체 표시
+    noStroke();				// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(0, 255, 0);
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+  move(turnX, turnY) {			// 메소드: 플레이어 객체 이동
+    this.x += this.speed * turnX;	// x축 속도 누적 → x축 거리 이동 (turnX: 방향성)
+    this.y += this.speed * turnY;	// y축 속도 누적 → y축 거리 이동 (turnY: 방향성)
+    this.x = constrain(this.x, this.size/2, width - this.size/2);		// x축 이동 제한
+    this.y = constrain(this.y, this.size/2, height - this.size/2);		// y축 이동 제한
+  }
+  hit(other) {				// 메소드: 두 객체의 충돌 여부 판단
+    let distance = dist(this.x, this.y, other.x, other.y);		// 두 객체의 거리 측정
+    if (distance < (this.size + other.size) / 2) return true;	// 두 객체의 충돌 시
+    else return false;						// 두 객체의 미충돌 시
+  }
+}

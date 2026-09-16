@@ -1,0 +1,25 @@
+// 마우스가 원 내부 또는 외부에 있는지에 따라 배경색 변경
+
+function setup() {
+  createCanvas(300, 300);
+}
+
+function draw() {
+  let x = width/2, y = height/2, r = 100;		// 지역변수
+
+  if (check(x, y, r)) {					// 함수 호출부
+    background(255, 0, 0);
+  } else {
+    background(0);
+  }
+  ellipse(x, y, r*2, r*2);
+}
+
+function check(xx, yy, rr) {				// 함수 본체
+  let d = dist(xx, yy, mouseX, mouseY);
+  if (d < rr) {						// 마우스가 원 안으로 들어올 때
+    return true;
+  } else {						// 마우스가 원 밖으로 나갈 때
+    return false;
+  }
+}

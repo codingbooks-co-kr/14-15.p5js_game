@@ -1,0 +1,126 @@
+// 완성: 제한시간 내 방향키로 플레이어를 이동(→가속도와 마찰율 적용)하여 목표물 맞추면 다음 단계로 이동하며 제한시간 감소, 제한시간을 초과하면 게임 종료, 스페이스 키를 누르면 재시작
+
+let burstSound, burstImg, cosmosImg, targetImg, playerImgs = [];
+let targetX, targetY, targetSize, playerX, playerY, playerSize, speedX, speedY;
+let timer, timerSpeed, friction, direction, previousStage, stage = 1;
+
+function preload() {		// setup() 직전에 호출, 외부 파일의 로딩
+  burstSound = loadSound('data/burst.mp3');
+  burstImg = loadImage('data/burst.png');
+  cosmosImg = loadImage('data/cosmos.jpg');
+  targetImg = loadImage('data/circle1.png');
+
+  playerImgs[0] = loadImage('data/rocket0.png');	// 이미지0을 playerImgs[0]에 저장
+  playerImgs[1] = loadImage('data/rocket1.png');	// 이미지1을 playerImgs[1]에 저장
+  playerImgs[2] = loadImage('data/rocket2.png');	// 이미지2를 playerImgs[2]에 저장
+  playerImgs[3] = loadImage('data/rocket3.png');	// 이미지3을 playerImgs[3]에 저장
+}
+
+function setup() {
+  createCanvas(600, 600);
+  reset();			// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  image(cosmosImg, width/2, height/2, width, height);	// 배경 이미지 표시
+
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  text('Stage: ' + stage, width/2, 60);
+
+  timerProcess();			// 타이머 진행바 표시 및 게임 종료 시 처리
+  display();				// 목표물 및 플레이어 표시
+  move();				// 방향키로 플레이어 이동 제어
+  getTarget();				// 목표물 획득 시 처리
+}
+
+function timerProcess() {		// 타이머 진행바 표시 및 게임 종료 시 처리
+  fill(255, 0, 0);
+  rect(0, 0, timer, 20);			// 막대형 타이머 표시
+
+  timer -= timerSpeed;		// 타이머 감소
+  if (timer <= 0) {			// 제한시간 초과 시 게임 종료
+    fill(255);
+    text('GAME OVER', width/2, height/2);
+
+    stage = 1;				// 1단계
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function display() {			// 목표물 및 플레이어 표시
+  image(targetImg, targetX, targetY, targetSize, targetSize);			// 목표물 
+  image(playerImgs[direction], playerX, playerY, playerSize, playerSize);	// 플레이어
+}
+
+function move() {			// 방향키로 플레이어 이동 제어
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    direction = 0;			// 플레이어 이미지: playerImgs[0] 선택
+    speedX--;
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    direction = 1;			// 플레이어 이미지: playerImgs[1] 선택
+    speedX++;
+  }
+  if (keyIsDown(UP_ARROW)) {	// 위쪽 방향키를 누른 경우
+    direction = 2;			// 플레이어 이미지: playerImgs[2] 선택
+    speedY--;
+  }
+  if (keyIsDown(DOWN_ARROW)) {	// 아래쪽 방향키를 누른 경우
+    direction = 3;			// 플레이어 이미지: playerImgs[3] 선택
+    speedY++;
+  }
+
+  speedX *= friction;			// x축 속도에 마찰율 누적 → x축 속도 감소
+  speedY *= friction;			// y축 속도에 마찰율 누적 → y축 속도 감소
+  playerX += speedX;  		// x축 속도(부호: 방향성) 누적 → x축 거리 이동
+  playerY += speedY;  		// y축 속도(부호: 방향성) 누적 → y축 거리 이동
+  playerX = constrain(playerX, playerSize/2, width-playerSize/2);	// 좌우 이동 제한
+  playerY = constrain(playerY, playerSize/2, height-playerSize/2);	// 상하 이동 제한
+}
+
+function getTarget() {			// 목표물 획득 시 처리
+  let distance = dist(targetX, targetY, playerX, playerY);	// 목표물∼플레이어 거리
+  if (distance < (targetSize + playerSize) / 2) {		// 목표물∼플레이어 충돌
+    burstSound.play();			// 효과음 재생
+    image(burstImg, targetX, targetY, targetSize*2, targetSize*2);	// 폭발 이미지 표시
+
+    fill(255);
+    text('YOU WIN', width/2, height/2 - 30);
+    text('Hit the space key to start next stage', width/2, height/2 + 30);
+
+    stage++;				// 단계 증가
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {			// 스페이스 키를 누르면 게임 초기화, 재실행
+    reset();				// 게임 종료 시: 게임 초기화
+    loop();				// draw() 함수의 무한 반복 실행
+  }
+}
+
+function reset() {			// 게임 초기화
+  targetSize = 30;			// 목표물의 크기 초기화
+  targetX = random(targetSize, width-targetSize);	// 목표물의 x축 좌표 초기화(랜덤)
+  targetY = random(targetSize, height-targetSize);	// 목표물의 y축 좌표 초기화(랜덤)
+  playerX = width / 2;			// 플레이어 x축 좌표 초기화
+  playerY = height / 2;		// 플레이어 y축 좌표 초기화
+  playerSize = 30;			// 플레이어 크기 초기화
+  speedX = 0;				// 플레이어 x축 속도 초기화
+  speedY = 0;				// 플레이어 y축 속도 초기화
+  direction = 2;			// 플레이어 이미지 방향(0∼3)
+  friction = 0.98;			// 마찰율 초기화
+  timer = width;			// 타이머 초기화
+
+  if (stage === 1) {			// 1단계인 경우
+    timerSpeed = 1;			// 타이머 감소 속도 초기화
+  } else if (stage > 1 && stage !== previousStage) {	// 2단계 이상인 경우
+    timerSpeed += 0.2;		// 타이머 감소 속도 증가
+    if (timerSpeed > 3) timerSpeed = 3;		// 타이머 감소 속도 최대값: 3
+  }
+  previousStage = stage;		// 2단계 이상에서 동일 단계는 한 번만 처리
+  imageMode(CENTER);		// 이미지 정렬 모드: 이미지의 가운데에서 폭/높이 설정
+}

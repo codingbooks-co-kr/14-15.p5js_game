@@ -1,0 +1,40 @@
+// 1단계: 키보드 방향키로 플레이어를 회전, 이동하기
+
+let playerX, playerY, playerSize = 30, playerSpeed = 2, angle = 0;
+
+function setup() {
+  createCanvas(300, 300);
+  playerX = width / 2;				// 초기 x축 좌표
+  playerY = height / 2;			// 초기 y축 좌표
+}
+
+function draw() {
+  background(0, 10);				// 페이딩 효과 (투명도 10 부여)
+
+  push();					// [좌표 이동/회전하는 플레이어 설정 시작]
+  translate(playerX, playerY);			// (playerX, playerY)로 좌표 이동
+  rotate(angle);					// angle만큼 좌표 회전
+  stroke(0, 255, 0);
+  strokeWeight(5);
+  line(0, 0, playerSize, 0);			// (플레이어) 선 그리기
+  noFill();
+  ellipse(0, 0, playerSize, playerSize);		// (플레이어) 원 그리기
+  pop();						// [좌표 이동/회전하는 플레이어 설정 종료]
+
+  if (keyIsDown(LEFT_ARROW)) {		// 왼쪽 방향키를 누르면 좌회전
+    angle -= 0.05;				// 0.05라디안씩 감소
+  }
+  if (keyIsDown(RIGHT_ARROW)) {		// 오른쪽 방향키를 누르면 우회전
+    angle += 0.05;				// 0.05라디안씩 증가
+  }
+  if (keyIsDown(UP_ARROW)) {		// 위쪽 방향키를 누르면 (angle 방향) 전진
+    playerX += playerSpeed * cos(angle);
+    playerY += playerSpeed * sin(angle);
+  }
+  if (keyIsDown(DOWN_ARROW)) {		// 아래쪽 방향키를 누르면 (angle 방향) 후진
+    playerX -= playerSpeed * cos(angle);
+    playerY -= playerSpeed * sin(angle);
+  }
+  playerX = constrain(playerX, playerSize/2, width-playerSize/2);	// 좌우 이동 제한
+  playerY = constrain(playerY, playerSize/2, height-playerSize/2);	// 상하 이동 제한
+}

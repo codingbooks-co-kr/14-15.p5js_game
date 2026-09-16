@@ -1,0 +1,6 @@
+function setup() {
+  let a = PI / 4;	// 각도로는 45o
+  let t = tan(a);	// 45o의 탄젠트값
+  let at = atan(t);	// 45o의 아크 탄젠트값
+  console.log(a, t, at);
+}

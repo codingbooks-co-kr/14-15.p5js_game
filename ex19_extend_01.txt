@@ -1,0 +1,18 @@
+function setup() {
+  let arr = [10, 20, 30, 40];
+  let result = arr.fill(0); 	// 배열요소를 0으로 채우기
+  console.log(arr);		// 원본 배열값 확인(→변경됨)
+  console.log(result);		// 반환 배열값 확인
+
+  arr = [10, 20, 30, 40];
+  result = arr.fill(0, 1); 	// 인덱스1부터 0으로 채우기
+  console.log(result);		// 반환 배열값 확인
+  
+  arr = [10, 20, 30, 40];
+  result = arr.fill(0, 1, 3); 	// array[1]∼array[2]을 0으로
+  console.log(result);		// 반환 배열값 확인
+  
+  arr = new Array(6);		// 크기가 6인 배열 생성
+  result = arr.fill(0); 		// 배열요소를 0으로 채우기
+  console.log(result);		// 반환 배열값 확인
+}

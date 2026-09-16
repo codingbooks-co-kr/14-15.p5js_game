@@ -1,0 +1,137 @@
+// 완성: 키보드 방향키로 플레이어를 상하 이동하여 목표물 10개를 잡으면 다음 단계로 이동, 적의 크기 증가, 적과 충돌하면 게임 종료, 스페이스 키를 누르면 재시작
+
+let clapSound, catchSound, burstSound, burstImg, cosmosImg, targetImg, enemyImg, playerImg;
+let x1, x2, targets, enemies, player, enemySize, score, previousStage, stage = 1;
+
+function preload() {		// setup() 직전에 호출, 외부 파일의 로딩
+  clapSound = loadSound('data/claps.mp3');
+  catchSound = loadSound('data/catch.mp3');
+  burstSound = loadSound('data/burst.mp3');
+  burstImg = loadImage('data/burst.png');
+  cosmosImg = loadImage('data/cosmos.jpg');
+  targetImg = loadImage('data/circle1.png');
+  enemyImg = loadImage('data/enemy.png');
+  playerImg = loadImage('data/rocket0.png');
+}
+
+function setup() {
+  createCanvas(600, 500);
+  reset();			// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  imageMode(CORNER);	// 이미지 정렬 모드: 이미지의 좌상단 모서리 기준 폭/높이 설정
+  image(cosmosImg, x1, 0, width, height); 	// 배경 이미지1 표시
+  image(cosmosImg, x2, 0, width, height); 	// 배경 이미지2 표시
+  x1 += 2;					// 배경 이미지1 오른쪽으로 이동
+  x2 += 2;					// 배경 이미지2 오른쪽으로 이동
+  if (x1 > width) x1 = -width;			// 이미지1: 캔버스를 벗어나면 x좌표 재설정
+  if (x2 > width) x2 = -width;		// 이미지2: 캔버스를 벗어나면 x좌표 재설정
+
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  text('Stage: ' + stage + ', Score: ' + score, width/2, 30);		// 단계, 점수 표시
+
+  imageMode(CENTER);		// 이미지 정렬 모드: 이미지의 가운데에서 폭/높이 설정
+  playerControl();			// 플레이어 상하 이동 제어 
+  targetProcess();			// 목표물 객체의 생성, 추가, 표시, 이동, 제거
+  enemyProcess();			// 적 객체의 생성, 추가, 표시, 이동, 제거
+}
+
+function playerControl() {		// 플레이어 상하 이동 제어 
+  image(playerImg, player.x, player.y, player.size, player.size);	   // 플레이어 이미지 표시
+  if (keyIsDown(UP_ARROW)) {	// 위쪽 방향키를 누른 경우
+    player.y -= player.speed;		// y축 속도(-부호: 위쪽) 누적 → 위쪽 이동 
+  }
+  if (keyIsDown(DOWN_ARROW)) {	// 아래쪽 방향키를 누른 경우
+    player.y += player.speed;		// y축 속도(+부호: 아래쪽) 누적 → 아래쪽 이동 
+  }
+  player.y = constrain(player.y, player.size/2, height-player.size/2);	// 상하 이동 제한
+}
+
+function targetProcess() {		// 목표물 객체의 생성, 추가, 표시, 이동, 제거
+  if (frameCount % 20 == 0) {		// 1/3초마다 목표물(target) 객체 생성
+    let target = { x: 0, y: random(height), size: random(20, 50), speed: random(2, 7) };
+    targets.push(target);		// 생성된 target 객체를 targets 배열에 추가
+  }
+
+  // 생성된 목표물 객체의 표시, 이동, 제거
+  for (let i = targets.length-1; i >= 0; i--) {		// 목표물 객체별 역순 반복 처리
+    image(targetImg, targets[i].x, targets[i].y, targets[i].size, targets[i].size);   // 목표물
+
+    targets[i].x += targets[i].speed;	// 목표물의 x축 속도 누적 → x축 거리 이동 
+    if (targets[i].x > width) {		// 목표물이 캔버스의 오른쪽 경계를 벗어나면
+      targets.splice(i, 1);		// targets[i] 요소 제거
+    }
+
+    let distance = dist(targets[i].x, targets[i].y, player.x, player.y);
+    if (distance < (targets[i].size + player.size) / 2) {		// 목표물과 플레이어 충돌
+      catchSound.play();		// 효과음 재생
+      targets.splice(i, 1);		// targets[i] 요소 제거
+      score++;				// 점수 증가
+    }
+  }
+
+  if (score >= 10) {			// 목표물 최소 10개 맞추면 단계 이동
+    clapSound.play();			// 효과음 재생
+    fill(255);
+    text('YOU WIN', width/2, height/2 - 30);
+    text('Hit the space key to start next stage', width/2, height/2 + 30);
+
+    stage++;				// 단계 증가
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function enemyProcess() {		// 적 객체의 생성, 추가, 표시, 이동, 제거
+  if (frameCount % 20 == 0) {		// 1/3초마다 적(enemy) 객체 생성
+    let enemy = { x: 0, y: random(height), size: enemySize, speed: random(2, 7) };
+    enemies.push(enemy);		// 생성된 enemy 객체를 enemies 배열에 추가
+  }
+
+  // 생성된 적 객체의 표시, 이동, 제거
+  for (let i = enemies.length-1; i >= 0; i--) {		// 적 객체별 역순 반복 처리
+    image(enemyImg, enemies[i].x, enemies[i].y, enemies[i].size, enemies[i].size);
+    enemies[i].x += enemies[i].speed;		// 적의 x축 속도 누적 → x축 거리 이동 
+    if (enemies[i].x > width) {			// 적이 캔버스의 오른쪽 경계를 벗어나면
+      enemies.splice(i, 1);			// enemies[i] 요소 제거
+    }
+
+    let distance = dist(enemies[i].x, enemies[i].y, player.x, player.y);
+    if (distance < (enemies[i].size + player.size) / 2) {		// 적과 플레이어 충돌
+      burstSound.play();					// 효과음 재생
+      image(burstImg, player.x, player.y, player.size*2, player.size*2);		// 폭발
+
+      fill(255);
+      text('GAME OVER', width/2, height/2);
+
+      stage = 1;			// 1단계
+      noLoop();				// draw() 함수의 반복 실행 일시 정지
+    }
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {			// 스페이스 키를 누르면 게임 초기화, 재실행
+    reset();				// 게임 종료 시: 게임 초기화
+    loop();				// draw() 함수의 무한 반복 실행
+  }
+}
+
+function reset() {			// 게임 초기화
+  x1 = 0;				// 배경 이미지1 x좌표 초기화
+  x2 = -width;				// 배경 이미지2 x좌표 초기화
+  targets = [];				// 목표물 객체: 빈 배열로 초기화
+  enemies = [];			// 적 객체: 빈 배열로 초기화
+  player = { x: width-30, y: height/2, size: 30, speed: 3 };	// 플레이어 객체 초기화
+  score = 0;				// 점수 초기화
+
+  if (stage === 1) {			// 1단계인 경우
+    enemySize = 30;			// 적의 크기 초기화
+  } else if (stage > 1 && stage !== previousStage) {		// 2단계 이상인 경우
+    enemySize += 4;			// 적의 크기 증가
+    if (enemySize > 50) w = 50;	// 적의 최대 크기: 50
+  }
+  previousStage = stage;		// 2단계 이상에서 동일 단계는 한 번만 처리
+}

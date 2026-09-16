@@ -1,0 +1,34 @@
+// 5단계: 키보드 방향키로 플레이어를 상하좌우로 이동 
+
+let cols, rows, w = 30, playerX = 0, playerY = 0;
+
+function setup() {
+  createCanvas(630, 630);		// 예) 30(=w:미로단위크기)×21(=cols,rows) = 630
+  cols = int(width / w);		// 예) cols  = 630 / 30 = 21개(홀수)
+  rows = int(height / w);		// 예) rows  = 630 / 30 = 21개(홀수)
+}
+
+function draw() {
+  background(0);
+
+  for (let y = 0; y < rows; y++) {	// rows: 세로축(행)은 홀수 개
+    for (let x = 0; x < cols; x++) {	// cols: 가로축(열)은 홀수 개
+      fill(200);
+      rect(x*w, y*w, w, w);		// 예) 30(=w) * 21(=cols) = 630
+    }
+  }
+
+  fill(0, 255, 0);
+  ellipse(playerX*w+w/2, playerY*w+w/2, w, w);	// 플레이어 표시
+}
+
+function keyPressed() {				// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (keyCode === LEFT_ARROW) playerX--;	  // 왼쪽 키를 누르면 playerX는 1 감소
+  if (keyCode === RIGHT_ARROW) playerX++;  // 오른쪽 키를 누르면 playerX는 1 증가
+  if (keyCode === UP_ARROW) playerY--;	  // 위쪽 키를 누르면 playerY는 1 감소
+  if (keyCode === DOWN_ARROW) playerY++;  // 아래쪽 키를 누르면 playerY는 1 증가
+
+  playerX = constrain(playerX, 0, cols-1);	// 플레이어 좌우 이동 제한: 0∼cols-1
+  playerY = constrain(playerY, 0, rows-1);	// 플레이어 상하 이동 제한: 0∼rows-1
+  console.log(playerX, playerY);			// 이동 단위 좌표값 확인
+}

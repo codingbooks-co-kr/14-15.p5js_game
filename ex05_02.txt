@@ -1,0 +1,20 @@
+// 마우스가 사각형 내부에 들어오면 사각형의 색상 변경-1
+// rectMode(CENTER)를 사용하는 경우
+
+let x = 150, y = 150, w = 100, h = 200;
+
+function setup() {
+  createCanvas(300, 300);
+}
+
+function draw() {
+  background(0);
+
+  if (mouseX > x-w/2 && mouseX < x+w/2 && mouseY > y-h/2 && mouseY < y+h/2) {			// 마우스가 사각형 안으로 들어올 때
+    fill(255, 0, 0);
+  } else {			// 마우스가 사각형 밖으로 나갈 때
+    fill(0, 255, 0);
+  }
+  rectMode(CENTER);		// 사각형의 정가운데를 기준으로 폭과 높이 설정
+  rect(x, y, w, h);		// 사각형
+}

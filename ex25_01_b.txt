@@ -1,0 +1,33 @@
+// 원 좌우 반사-2 (함수 사용)
+
+let c, x, y, d, speed;
+
+function setup() {
+  createCanvas(300, 200);
+
+  // 전역변수 초기화
+  c = color(255);
+  x = width/2;
+  y = height/2;
+  d = 30;
+  speed = 1;
+}
+
+function draw() {
+  background(0, 10);	// 페이딩 효과
+  display();	// 원 그리는 동작
+  move();	// 원 이동, 반사하는 동작
+}
+
+function display() {	// 함수
+  noStroke();
+  fill(c);
+  ellipse(x, y, d, d);
+}
+
+function move() {	// 함수
+  x += speed;
+  if (x < 0 || x > width) {
+    speed *= -1;
+  }
+}

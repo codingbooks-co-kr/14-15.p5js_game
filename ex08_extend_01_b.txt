@@ -1,0 +1,13 @@
+// 콜백함수를 사용한 이미지 파일 출력
+// [질문8.2] 수정
+
+let imageFile;	
+
+function setup() {
+  createCanvas(500, 500);
+  imageFile = loadImage('data/flower.jpg', imageReady);		   // 콜백함수 호출
+}
+
+function imageReady() {   // 콜백함수
+  image(imageFile, 0, 0);  // 이미지 표시
+}

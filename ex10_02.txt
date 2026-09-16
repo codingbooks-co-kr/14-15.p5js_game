@@ -1,0 +1,38 @@
+// 2단계: 1초마다 랜덤 위치로 변경되는 목표물을 마우스로 맞추면 점수 상승
+
+let targetX, targetY, targetSize = 50, num = 0, score = 0;
+let interval, currentTime, previousTime = 0, setTime = 1000;
+
+function setup() {
+  createCanvas(600, 600);
+  targetX = random(targetSize, width-targetSize);	// 목표물의 x축 좌표 랜덤 변경
+  targetY = random(targetSize, height-targetSize);	// 목표물의 y축 좌표 랜덤 변경
+}
+
+function draw() {
+  background(0);
+  
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);			// 문자열 가운데 정렬
+  text('Number: ' + num + ', Score: ' + score, width/2, 30);	// 출현횟수, 점수 표시
+  
+  fill(255);
+  ellipse(targetX, targetY, targetSize, targetSize);	// 목표물 표시
+
+  currentTime = millis();			// 현재시간 설정
+  interval = currentTime - previousTime; 	// 시간차(interval) = 현재시간 - 이전시간
+  if (interval > setTime) {			// setTime(=1000msec) 마다 처리
+    previousTime = millis();			// 이전시간을 현재시간으로 갱신
+    targetX = random(targetSize, width-targetSize);	// 목표물의 x축 좌표 랜덤 변경
+    targetY = random(targetSize, height-targetSize);	// 목표물의 x축 좌표 랜덤 변경
+    num++;					// 목표물 출현 횟수 증가
+  }
+}
+
+function mousePressed() {			// 이벤트함수: 마우스를 누르면 자동 실행
+  let distance = dist(targetX, targetY, mouseX, mouseY);	// 목표물∼마우스 거리
+  if (distance < targetSize/2) {			// 원형 내부에서 마우스를 누른 경우
+    score++;					// 점수 상승
+  }
+}

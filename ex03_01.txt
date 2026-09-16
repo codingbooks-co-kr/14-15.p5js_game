@@ -1,0 +1,16 @@
+// 한쪽 경계에서 반사하는 원
+
+let x = 0, speed = 1;
+
+function setup() {
+  createCanvas(300, 300);
+}
+
+function draw() {
+  background(0);
+  ellipse(x, height/2, 30, 30);
+  x += speed;		// x축 속도(부호: 방향성) 누적 → x축 거리 이동 
+  if (x > width) {		// 오른쪽 경계에 부딪치는 경우
+    speed *= -1;		// speed = -1(부호반전)이 되고 x는 왼쪽으로 이동
+  }
+}

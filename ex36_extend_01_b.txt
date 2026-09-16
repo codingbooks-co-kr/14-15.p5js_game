@@ -1,0 +1,14 @@
+function setup() {
+  let array1 = [10, 20];
+  let array2 = [30, 40];
+
+  let result = array1.concat(array2);	// 배열 추가
+  console.log(result);
+
+  result = array1.concat(100);		// 값 추가
+  console.log(result);
+
+  result = array2.push(200);		// 값 추가
+  console.log(result);			// 새 배열의 크기 반환
+  console.log(array2);			// 원본 배열 변경
+}

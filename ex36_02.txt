@@ -1,0 +1,96 @@
+// 2단계: 키보드 방향키로 플레이어를 회전, 이동하면서 스페이스 키를 눌러 총알 발사
+
+let player, bullets = [];
+
+function setup() {
+  createCanvas(300, 300);
+  player = new Player();		// 플레이어 객체 생성 및 초기화
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+  
+  player.display();			// 플레이어 객체 표시
+
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    player.rotate(-0.03);		// 플레이어 좌회전(→0.03라디안씩 감소)
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    player.rotate(0.03);			// 플레이어 우회전(→0.03라디안씩 증가)
+  }
+  if (keyIsDown(UP_ARROW)) {	// 위쪽 방향키를 누른 경우
+    player.move(1);			// 플레이어 전진 
+  }
+  if (keyIsDown(DOWN_ARROW)) {	// 아래쪽 방향키를 누른 경우
+    player.move(-1);			// 플레이어 후진 
+  }
+
+  for (let i = bullets.length-1; i >= 0; i--) {	// 역순 반복 처리: [참고20.1] 참조
+    bullets[i].display();			// 총알 객체 표시
+    bullets[i].move();			// 총알 객체 이동(=발사)
+    if (bullets[i].offCanvas()) {		// 총알 객체가 캔버스에서 사라지면 배열에서 제거
+      bullets.splice(i, 1);		// 총알 객체 bullets[i] 삭제
+    }
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {			// 스페이스키를 누르는 경우
+    let bullet = new Bullet(player.x, player.y, player.angle);	// 총알 객체 생성, 초기화
+    bullets.push(bullet);			// bullets 배열 끝에 bullet 객체 추가
+  }
+}
+
+class Player {				// 플레이어 클래스 
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.x = width / 2;			// 플레이어 x축 좌표 초기화
+    this.y = height / 2;		// 플레이어 y축 좌표 초기화
+    this.size = 40;			// 플레이어 크기 초기화
+    this.speed = 2;			// 플레이어 속도 초기화
+    this.angle = 0;			// 플레이어 회전각 초기화
+  }
+  display() {				// 메소드: 플레이어 객체 표시
+    push();				// [좌표 변환 설정 시작]
+    translate(this.x, this.y);		// 좌표 이동
+    rotate(this.angle);			// 좌표 회전
+    stroke(255);
+    strokeWeight(5);
+    noFill();
+    line(0, 0, 30, 0);
+    rectMode(CENTER);		// 사각형의 정가운데를 기준으로 폭과 높이 설정
+    rect(0, 0, this.size, this.size); 
+    pop();				// [좌표 변환 설정 종료]
+  }
+  rotate(radian) {			// 메소드: 플레이어 객체 회전
+    this.angle += radian;
+  }
+  move(turn) {				// 메소드: 플레이어 객체 이동
+    this.x += this.speed * turn * cos(this.angle);	// x축속도누적→거리이동(turn:방향성)
+    this.y += this.speed * turn * sin(this.angle);	// y축속도누적→거리이동(turn:방향성)
+    this.x = constrain(this.x, this.size/2, width-this.size/2);	// x축 이동 제한
+    this.y = constrain(this.y, this.size/2, height-this.size/2);	// y축 이동 제한
+  }
+}
+
+class Bullet {				// 총알 클래스 
+  constructor(x, y, angle) {		// 생성자: 속성 추가 및 초기화
+    this.x = x;				// 총알 x축 좌표 초기화
+    this.y = y;				// 총알 y축 좌표 초기화
+    this.size = 5;			// 총알 크기 초기화
+    this.speedX = 10 * cos(angle);	// angle 방향에서 총알 x축 속도(10) 초기화(→13.1절)
+    this.speedY = 10 * sin(angle);	// angle 방향에서 총알 y축 속도(10) 초기화(→13.1절)
+  }
+  display() {				// 메소드: 총알 객체 표시
+    fill(255);
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+  move() {				// 메소드: 총알 객체 이동(=발사)
+    this.x += this.speedX;   		// x축 속도 누적 → x축 거리 이동
+    this.y += this.speedY;   		// y축 속도 누적 → y축 거리 이동
+  }
+  offCanvas() {				// 메소드: 총알이 캔버스를 벗어나는지 여부 검사
+    if (this.x < 0 || this.x > width) return true;	// 캔버스의 좌우경계를 벗어난 경우
+    if (this.y < 0 || this.y > height) return true;	// 캔버스의 상하경계를 벗어난 경우
+    return false;
+  }
+}

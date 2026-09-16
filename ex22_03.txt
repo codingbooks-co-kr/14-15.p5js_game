@@ -1,0 +1,73 @@
+// 3단계: 방향키로 플레이어 상하좌우 이동, 스페이스 키로 총알 발사, 목표물을 맞추면 소멸
+
+let player, targets = [], bullets = [];
+
+function setup() {
+  createCanvas(500, 600);
+  player = { x: width/2, y: height/2, size: 30, speed: 3 };	  // 플레이어 객체 초기화
+}
+
+function draw() {
+  background(0);
+
+  fill(0, 255, 0);
+  ellipse(player.x, player.y, player.size, player.size);		  // 플레이어 객체 표시
+
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    player.x -= player.speed;		// x축 속도(-부호: 왼쪽) 누적 → 왼쪽 이동 
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    player.x += player.speed;		// x축 속도(+부호: 오른쪽) 누적 → 오른쪽 이동 
+  }
+  if (keyIsDown(UP_ARROW)) {	// 위쪽 방향키를 누른 경우
+    player.y -= player.speed;		// y축 속도(-부호: 위쪽) 누적 → 위쪽 이동 
+  }
+  if (keyIsDown(DOWN_ARROW)) {	// 아래쪽 방향키를 누른 경우
+    player.y += player.speed;		// y축 속도(+부호: 아래쪽) 누적 → 아래쪽 이동 
+  }
+  player.x = constrain(player.x, 0, width);	// 플레이어 좌우 이동 제한
+  player.y = constrain(player.y, 0, height);	// 플레이어 상하 이동 제한
+
+  if (frameCount % 60 == 0) {		// 1초마다 target 객체 생성 후 targets 배열에 추가
+    let target = { x: random(width), y: 0, size: 30, speed: 2 };
+    targets.push(target);		// 생성된 target 객체를 targets 배열에 추가
+  }
+
+  for (let i = targets.length-1; i >= 0; i--) {		// 목표물 객체별 역순 반복 처리
+    fill(255, 200);
+    ellipse(targets[i].x, targets[i].y, targets[i].size, targets[i].size);	// 목표물 객체 표시
+
+    targets[i].y += targets[i].speed;	// 목표물의 y축 속도 누적 → 아래쪽 이동
+    if (targets[i].y > height) {		// 목표물이 캔버스 바닥을 벗어난 경우
+      targets.splice(i, 1);		// targets[i] 목표물 객체 제거
+    }
+  }
+
+  for (let i = bullets.length-1; i >= 0; i--) {		// 총알 객체별 역순 반복 처리
+    fill(255, 0, 0);
+    ellipse(bullets[i].x, bullets[i].y, bullets[i].size, bullets[i].size);	// 총알 객체 표시
+
+    bullets[i].y -= bullets[i].speed;	// 총알 객체는 위쪽 방향으로 이동(=발사)
+    if (bullets[i].y < 0) {		// 총알 객체가 캔버스 화면을 벗어난 경우
+      bullets.splice(i, 1);		// bullets[i] 총알 객체 제거
+    } else {				// 총알이 발사되어 캔버스 안에서 이동 중인 경우
+      for (let j = targets.length-1; j >= 0; j--) {	// 목표물 객체별 역순 반복 처리
+        let distance = dist(bullets[i].x, bullets[i].y, targets[j].x, targets[j].y);
+        if (distance < (bullets[i].size + targets[j].size) / 2) {		// 총알∼목표물 충돌
+          fill(255, 0, 0, 200);
+          ellipse(targets[j].x, targets[j].y, targets[j].size*2, targets[j].size*2);	// 폭발
+          targets.splice(j, 1);		// targets[j] 목표물 객체 제거
+          bullets.splice(i, 1);		// bullets[i] 총알 객체 제거
+          break;			// 반복문 빠져나옴
+        }
+      }
+    }
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {			// 스페이스 키를 눌러 총알 한 번 발사
+    let bullet = { x: player.x, y: player.y, size: 10, speed: 10 };	// 객체생성,초기화
+    bullets.push(bullet);			// 생성된 bullet 객체를 bullets 배열에 추가
+  }
+}

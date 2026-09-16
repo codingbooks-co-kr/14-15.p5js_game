@@ -1,0 +1,90 @@
+// 2단계: 방향키로 플레이어를 좌우로 점프 이동 및 낙하하면서 목적지 착륙
+
+let platform, player;
+
+function setup() {
+  createCanvas(600, 600);
+  platform = new Platform();		// 목적지 객체 생성 및 초기화
+  player = new Player();		// 플레이어 객체 생성 및 초기화
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+
+  platform.display();			// 목적지 객체 표시
+  player.display();			// 플레이어 객체 표시
+  player.move();			// 플레이어 객체 이동
+
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    player.jump(-1);			// 플레이어 객체 왼쪽 방향 점프
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    player.jump(1);			// 플레이어 객체 오른쪽 방향 점프
+  }
+  
+  if (player.land(platform)) {		// 플레이어가 플랫폼에 착륙한 경우
+    fill(255);
+    text('YOU WIN', width/2, height/2 - 30);
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+
+  if (player.drop()) {			// 플레이어가 캔버스 화면 바닥을 벗어난 경우
+    fill(255);
+    text('GAME OVER', width/2, height/2);
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+class Platform {			// 목적지 클래스
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.w = 80;			// 목적지 폭 초기화
+    this.h = 30;			// 목적지 높이 초기화
+    this.x = random(this.w/2, width-this.w/2);		// 목적지 x축 좌표 초기화
+    this.y = height - 50;				// 목적지 y축 좌표 초기화
+  }
+  display() {				// 목적지 객체 표시
+    fill(255);
+    rectMode(CENTER);		// 사각형의 정가운데를 기준으로 폭과 높이 설정
+    rect(this.x, this.y, this.w, this.h);
+  }
+}
+
+class Player {				// 플레이어 클래스 
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.size = 40;			// 플레이어 크기 초기화
+    this.x = width / 2;			// 플레이어 x축 좌표 초기화
+    this.y = this.size;			// 플레이어 y축 좌표 초기화
+    this.speedX = 0;			// 플레이어 x축 속도 초기화
+    this.speedY = 0;			// 플레이어 y축 속도 초기화
+    this.gravity = 0;			// 플레이어 중력가속도 초기화
+  } 
+  display() {				// 메소드: 플레이어 객체 표시
+    noStroke();				// 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(0, 255, 0);
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+  move() {				// 메소드: 플레이어 객체 이동
+    this.speedY += this.gravity;	// y축 속도에 중력 누적 → y축 가속
+    this.x += this.speedX;   		// x축 속도 누적 → x축 거리 이동
+    this.y += this.speedY;   		// y축 속도 누적 → y축 거리 이동
+    this.x = constrain(this.x, this.size/2, width - this.size/2);		// x축 이동 제한
+  }
+  jump(turn) {				// 메소드: 플레이어 객체 점프
+    this.speedX = 2 * turn;		// 플레이어 x축 속도 (turn: -부호:좌향, +부호:우향)
+    this.speedY = -2;			// 플레이어 y축 속도 (-부호: 상향)
+    this.gravity = 0.2;			// 플레이어 중력가속도
+  }
+  land(other) {				// 메소드: 플레이어가 플랫폼에 착륙했는지 여부 판단
+    if (this.x > other.x - other.w/2 && this.x < other.x + other.w/2 && this.y > other.y - (this.size + other.h) /2) {	// 9.3절의 if문 참조
+      return true;
+    } else {
+      return false;
+    }
+  }
+  drop() {				// 메소드: 플레이어가 캔버스 바닥을 벗어났는지 여부 판단
+    if (player.y > height) return true;	// 플레이어가 캔버스 바닥을 벗어난 경우
+    else return false;			// 캔버스 바닥을 벗어나지 않은 경우
+  }
+}

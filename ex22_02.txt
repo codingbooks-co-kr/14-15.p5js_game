@@ -1,0 +1,47 @@
+// 2단계: 키보드 방향키로 플레이어를 상하좌우 이동, 스페이스 키를 눌러 총알 발사
+
+let player, bullets = [];
+
+function setup() {
+  createCanvas(300, 300);
+  player = { x: width/2, y: height/2, size: 30, speed: 3 };	  // 플레이어 객체 초기화
+}
+
+function draw() {
+  background(0);
+
+  fill(0, 255, 0);
+  ellipse(player.x, player.y, player.size, player.size);		  // 플레이어 객체 표시
+
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    player.x -= player.speed;		// x축 속도(-부호: 왼쪽) 누적 → 왼쪽 이동 
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    player.x += player.speed;		// x축 속도(+부호: 오른쪽) 누적 → 오른쪽 이동 
+  }
+  if (keyIsDown(UP_ARROW)) {	// 위쪽 방향키를 누른 경우
+    player.y -= player.speed;		// y축 속도(-부호: 위쪽) 누적 → 위쪽 이동 
+  }
+  if (keyIsDown(DOWN_ARROW)) {	// 아래쪽 방향키를 누른 경우
+    player.y += player.speed;		// y축 속도(+부호: 아래쪽) 누적 → 아래쪽 이동 
+  }
+  player.x = constrain(player.x, 0, width);	// 플레이어 좌우 이동 제한
+  player.y = constrain(player.y, 0, height);	// 플레이어 상하 이동 제한
+
+  for (let i = bullets.length-1; i >= 0; i--) {				// 총알 객체별 반복
+    fill(255, 0, 0);
+    ellipse(bullets[i].x, bullets[i].y, bullets[i].size, bullets[i].size);	// 총알 객체 표시
+
+    bullets[i].y -= bullets[i].speed;	// 총알 객체는 위쪽 방향으로 이동(=발사)
+    if (bullets[i].y < 0) {		// 총알 객체가 캔버스 화면을 벗어나면 제거
+      bullets.splice(i, 1);		// bullets[i] 요소 제거
+    }
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {			// 스페이스 키를 눌러 총알 생성
+    let bullet = { x: player.x, y: player.y, size: 10, speed: 10 };	// 객체 생성,초기화
+    bullets.push(bullet);			// 생성된 총알(bullet) 객체를 bullets 배열에 추가
+  }
+}

@@ -1,0 +1,17 @@
+// frameCount 기반 시간 측정-2: 0.5초마다 원형 생성
+
+let interval, previousCount = 0;
+
+function setup() {
+  createCanvas(300, 300);
+  background(0);
+}
+
+function draw() {
+  interval = frameCount - previousCount;	// 프레임차 = 현재프레임 - 이전프레임
+  if (interval > 30) {				// 30프레임(=0.5초)마다 if문은 true가 됨
+    previousCount = frameCount;		// 30프레임(=0.5초)마다 previousCount 갱신
+    fill(random(width), random(width), random(width), 200);
+    ellipse(random(width), random(height), 50, 50);
+  }
+}

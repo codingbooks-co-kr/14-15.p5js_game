@@ -1,0 +1,31 @@
+// 2단계: 좌→우로 끊임없이 이동하는 10개의 목표물
+
+let targetX = [], targetY = [], targetSize = [], targetSpeed = [], targetNum = 10;
+
+function setup() {
+  createCanvas(600, 500);
+  for (let i = 0; i < targetNum; i++) {
+    targetX[i] = 0;				// 목표물의 x축 좌표 초기화
+    targetY[i] = random(height);		// 목표물의 y축 좌표 초기화(랜덤)
+    targetSize[i] = random(20, 50);		// 목표물의 크기 초기화(랜덤)
+    targetSpeed[i] = random(2, 7);		// 목표물의 속도 초기화(랜덤)
+  }
+}
+
+function draw() {
+  background(0, 10);				// 페이딩 효과 (투명도 10 부여)
+
+  for (let i = 0; i < targetNum; i++) {
+    noStroke();					// 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(255, 200);
+    ellipse(targetX[i], targetY[i], targetSize[i], targetSize[i]);
+
+    targetX[i] += targetSpeed[i];		// x축 속도 누적 → x축 거리 이동 
+    if (targetX[i] > width) {			// 목표물이 캔버스의 오른쪽 경계를 벗어나면 
+      targetX[i] = 0;				// 목표물의 x축 좌표 초기화
+      targetY[i] = random(height);		// 목표물의 y축 좌표 초기화(랜덤)
+      targetSize[i] = random(20, 50);		// 목표물의 크기 초기화(랜덤)
+      targetSpeed[i] = random(2, 7);		// 목표물의 속도 초기화(랜덤)
+    }
+  }
+}

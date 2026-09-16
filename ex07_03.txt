@@ -1,0 +1,23 @@
+// 방향키를 눌러 원을 상하좌우로 이동
+
+let x = 150, y = 150;
+
+function setup() {
+  createCanvas(300, 300);
+}
+
+function draw() {
+  background(0);
+  if (keyIsPressed) {				// 중첩 if문: ❶키를 누른 경우 
+    if (keyCode === LEFT_ARROW) {	// 중첩 if문: ❷키값이 왼쪽 방향키인 경우
+      x--;
+    } else if (keyCode === RIGHT_ARROW) {	// 키값이 오른쪽 방향키인 경우
+      x++;
+    } else if (keyCode === UP_ARROW) {		// 키값이 위쪽 방향키인 경우
+      y--;
+    } else if (keyCode === DOWN_ARROW) {	// 키값이 아래쪽 방향키인 경우
+      y++;
+    }
+  }
+  ellipse(x, y, 100, 100);
+}

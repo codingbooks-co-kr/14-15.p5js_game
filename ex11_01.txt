@@ -1,0 +1,21 @@
+// 1단계: 랜덤하게 움직이는 사각형 목표물
+
+let targetX, targetY, targetSize = 50, tx = 0, ty = 0.5;
+
+function setup() {
+  createCanvas(500, 500);
+}
+
+function draw() {
+  background(0, 10);				// 페이딩 효과 (투명도 10 부여)
+  
+  targetX = noise(tx) * width;			// targetX 랜덤값 범위: 0∼width
+  targetY = noise(ty) * height;			// targetY 랜덤값 범위: 0∼height
+
+  stroke(255);
+  fill(0, 255, 0);
+  rect(targetX, targetY, targetSize, targetSize);	// 랜덤 이동하는 사각형 목표물 표시
+  
+  tx += 0.01;					// 증가율 누적
+  ty += 0.01;					// 증가율 누적
+}

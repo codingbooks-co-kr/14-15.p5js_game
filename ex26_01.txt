@@ -1,0 +1,41 @@
+// [본문 코드] 원형 객체 좌우 반사 
+// 객체 두 개 생성 (미완성)
+
+let c1, c2;
+
+function setup() {
+  createCanvas(300, 200);
+  c1 = new Circle();	// 객체 생성,초기화
+  c2 = new Circle();	// 객체 생성,초기화
+}
+
+function draw() {
+  background(0, 10);	// 페이딩 효과
+  c1.display();		// 메소드 호출
+  c1.move();		// 메소드 호출
+  c2.display();		// 메소드 호출
+  c2.move();		// 메소드 호출
+}
+
+// [클래스 코드]
+
+class Circle {
+  constructor() {	// 생성자
+    this.c = color(255);
+    this.x = width/2;
+    this.y = height/2;
+    this.d = 30;
+    this.speed = 1;
+  }
+  display() {		// 메소드
+    noStroke();
+    fill(this.c);
+    ellipse(this.x, this.y, this.d, this.d);
+  }
+  move() {		// 메소드
+    this.x += this.speed;
+    if (this.x < 0 || this.x > width) {
+      this.speed *= -1;
+    }
+  }
+}

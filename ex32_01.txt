@@ -1,0 +1,73 @@
+// 1단계: 플레이어를 따라오는 적
+
+let player, enemy;
+
+function setup() {
+  createCanvas(300, 300);
+  player = new Player();		// 플레이어 객체 생성 및 초기화
+  enemy = new Enemy();		// 적 객체 생성 및 초기화
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+
+  player.display();			// 플레이어 객체 표시
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    player.move(-1, 0);		// 플레이어 객체 왼쪽 이동
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    player.move(1, 0);			// 플레이어 객체 오른쪽 이동
+  }
+  if (keyIsDown(UP_ARROW)) {	// 위쪽 방향키를 누른 경우
+    player.move(0, -1);		// 플레이어 객체 위쪽 이동
+  }
+  if (keyIsDown(DOWN_ARROW)) {	// 아래쪽 방향키를 누른 경우
+    player.move(0, 1);			// 플레이어 객체 아래쪽 이동
+  }
+
+  enemy.display();			// 적 객체 표시
+  enemy.move(player);			// 적 객체 플레이어 추적
+}
+
+class Enemy {				// 적 클래스
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.x = random(width);		// 적 x축 좌표 초기화(랜덤)
+    this.y = random(height);		// 적 y축 좌표 초기화(랜덤)
+    this.size = 40;			// 적 크기 초기화(랜덤)
+    this.speed = random(0.5, 1.5);	// 적 속도 초기화(랜덤)
+  }
+  display() {				// 메소드: 적 객체 표시
+    noStroke();				// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(255, 0, 0);
+    ellipse(this.x, this.y, this.size, this.size);
+  }  
+  move(player) {			// 메소드: 적 객체의 플레이어 추적(→17.1절 참조)
+    let distance = dist(this.x, this.y, player.x, player.y);		// 적∼플레이어 거리
+    let dx = (player.x - this.x) / distance;	// dx가 +이면 player가 오른쪽 위치(-:반대)
+    let dy = (player.y - this.y) / distance;	// dy가 +이면 player가 아래쪽 위치(-:반대)
+    dx *= this.speed;			// 적 x축 속도 
+    dy *= this.speed;			// 적 y축 속도 
+    this.x += dx;			// dx가 +이면 오른쪽 이동, -이면 왼쪽 이동
+    this.y += dy; 			// dy가 +이면 아래쪽 이동, -이면 위쪽 이동
+  }
+}
+
+class Player {				// 플레이어 클래스 
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.x = width / 2;			// 플레이어 x축 좌표 초기화
+    this.y = height / 2;		// 플레이어 y축 좌표 초기화
+    this.size = 40;			// 플레이어 크기 초기화
+    this.speed = 2;			// 플레이어 속도 초기화
+  }
+  display() {				// 메소드: 플레이어 객체 표시
+    noStroke();				// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(0, 255, 0);
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+  move(turnX, turnY) {			// 메소드: 플레이어 객체 이동
+    this.x += this.speed * turnX;	// x축 속도 누적 → x축 거리 이동 (turnX: 방향성)
+    this.y += this.speed * turnY;	// y축 속도 누적 → y축 거리 이동 (turnY: 방향성)
+    this.x = constrain(this.x, this.size/2, width - this.size/2);		// x축 이동 제한
+    this.y = constrain(this.y, this.size/2, height - this.size/2);		// y축 이동 제한
+  }
+}

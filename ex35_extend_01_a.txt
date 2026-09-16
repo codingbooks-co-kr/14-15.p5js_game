@@ -1,0 +1,13 @@
+function setup() {
+  createCanvas(300, 300);
+}
+
+function draw() {
+  background(200);
+  let a = atan2(mouseY - height/2, mouseX - width/2);
+  translate(width/2, height/2);		// 좌표 이동
+  rotate(a);				// 좌표 회전
+  console.log(a);			// 라디안값 확인
+  line(0, 0, width/2, 0);
+  text(nf(a, 1, 4), 100, 20);		// 라디안값 확인
+}

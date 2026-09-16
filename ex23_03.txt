@@ -1,0 +1,54 @@
+// 3단계: 키보드 방향키로 플레이어(라켓)를 좌우 이동하여 볼 치기, 볼을 놓치면 게임 종료
+
+let ballX, ballY, ballSpeedX, ballSpeedY, ballSize = 30;
+let playerX, playerY, playerSpeed = 5, w = 100, h = 30;
+
+function setup() {
+  createCanvas(600, 500);
+  ballX = random(ballSize/2, width-ballSize/2);		// 볼의 x축 좌표 초기화(랜덤)
+  ballY = ballSize / 2;					// 볼의 y축 좌표 초기화
+  ballSpeedX = random(2, 5);				// 볼의 x축 속도 초기화(랜덤)
+  ballSpeedY = random(2, 5);				// 볼의 y축 속도 초기화(랜덤)
+  playerX = width / 2;					// 플레이어(라켓) x축 좌표 초기화
+  playerY = height - h;				// 플레이어(라켓) y축 좌표 초기화
+}
+
+function draw() {
+  background(0);
+
+  fill(255);
+  ellipse(ballX, ballY, ballSize, ballSize);		// 볼 표시
+  
+  fill(0, 255, 0);
+  rectMode(CENTER);			// 사각형의 정가운데를 기준으로 폭과 높이 설정
+  rect(playerX, playerY, w, h);		// 플레이어(라켓) 표시
+  
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    playerX -= playerSpeed;		// x축 속도(-부호: 왼쪽) 누적 → 왼쪽 이동 
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    playerX += playerSpeed;		// x축 속도(+부호: 오른쪽) 누적 → 오른쪽 이동 
+  }
+  playerX = constrain(playerX, w/2, width-w/2);	// 플레이어의 좌우 이동 제한
+  
+  ballX += ballSpeedX;    		// x축 속도(부호: 방향성) 누적 → x축 거리 이동 
+  ballY += ballSpeedY;   	 	// y축 속도(부호: 방향성) 누적 → y축 거리 이동 
+  if (ballX < ballSize/2 || ballX > width-ballSize/2) {	// 캔버스의 x축 경계에서 반사조건
+    ballSpeedX *= -1;			// 볼 x축 속도의 방향 반전, 즉 반사
+  }
+  if (ballY < ballSize/2) {		// 볼이 캔버스의 상단 경계에 부딪친 경우
+    ballSpeedY *= -1;			// 볼 y축 속도의 방향 반전, 즉 반사
+  }
+  if (ballX > playerX-w/2 && ballX < playerX+w/2 && ballY > playerY-(ballSize+h)/2) {
+    ballY = playerY - (ballSize + h) / 2;	// ballY 위치는 라켓 상단(→[참고16.1] 참조)
+    ballSpeedY *= -1;			// 반사 적용
+  }
+  
+  if (ballY > height) {			// 볼이 캔버스 바닥을 벗어난 경우
+    fill(255);
+    textSize(30);
+    textAlign(CENTER, CENTER);	// 문자열 가운데 정렬
+    text('GAME OVER', width/2, height/2);
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}

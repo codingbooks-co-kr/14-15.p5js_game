@@ -1,0 +1,66 @@
+// 2단계: 36개의 격자에 담긴 이모지(→하트, 폭탄) 표시, 스페이스키를 누르면 폭탄은 랜덤 변경 
+
+let cols, rows, grid, gridSize, bombImg = '💣', heartImg = '❤️️';
+
+function setup() {
+  createCanvas(600, 600);
+  reset();					// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  background(200);
+  for (let y = 0; y < rows; y++) {		// 세로축(행) 
+    for (let x = 0; x < cols; x++) {		// 가로축(열) 
+      if (grid[y][x].bomb) {			// 폭탄인 경우
+        grid[y][x].display(bombImg);		// 이모지 표시: 
+      } else {					// 폭탄이 아닌 경우
+        grid[y][x].display(heartImg);		// 이모지 표시: 
+      }
+    }
+  }
+}
+
+// 캔버스 크기 또는 격자(grid) 크기 변경 시 더블클릭함으로써 캔버스의 빈 공간을 삭제
+function doubleClicked() {		// 이벤트함수: 마우스를 더블클릭하면 한 번 실행
+    resizeCanvas(cols*gridSize, rows*gridSize);
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') reset();		// 스페이스 키를 누르면 게임 초기화, 재실행
+}
+
+function reset() {			// 게임 초기화
+  gridSize = 100;			// 격자 크기
+  rows = int(height / gridSize);	// 세로축(행) = 600/100 = 6
+  cols = int(width / gridSize);		// 가로축(열) = 600/100 = 6
+
+  grid = [];					// ❶ grid: 1차원 빈 배열의 생성
+  for (let y = 0; y < rows; y++) {		// 세로축(행)
+    grid[y] = [];				// ❷ grid: 2차원 빈 배열로 확장
+    for (let x = 0; x < cols; x++) {		// 가로축(열)
+      grid[y][x] = new Grid(x, y, gridSize);	// ❸ grid: 2차원 객체 배열 생성 및 초기화
+    }
+  }
+
+  let x = int(random(cols));		// 가로축(열) = 0∼5 중 랜덤 정수값
+  let y = int(random(rows));		// 세로축(행) = 0∼5 중 랜덤 정수값
+  grid[y][x].bomb = true;		// 랜덤 좌표에 폭탄 있음으로 설정
+}
+
+class Grid {					// 격자 클래스
+  constructor(x, y, gridSize) {			// 생성자: 속성 추가 및 초기화
+    this.x = x * gridSize;			// 격자 x좌표 초기화
+    this.y = y * gridSize;			// 격자 y좌표 초기화
+    this.size = gridSize;			// 격자 크기 초기화
+    this.bomb = false;				// 격자에 폭탄 없음으로 초기화
+  }
+  display(hidden) {				// 메소드: 격자 객체 표시
+    stroke(255);
+    noFill();
+    rect(this.x, this.y, this.size, this.size);	// 사각형 표시
+
+    textSize(gridSize*4/5);			// 텍스트(이모지) 크기 설정
+    textAlign(LEFT, TOP);			// 텍스트(이모지) 정렬
+    text(hidden, this.x, this.y);			// 텍스트(이모지) 표시
+  }
+}

@@ -1,0 +1,97 @@
+// 완성: 랜덤하게 변하는 목표물 15개 중 10개 맞추면 다음 단계로 이동, 목표물의 크기 및 위치 변경 시간 간격 감소, 10개를 맞추지 못하면 게임 종료, 스페이스 키를 누르면 재시작 
+
+let clapSound, catchSound, cosmosImg, targetImg;
+let targetX, targetY, targetSize, num, score, previousStage, stage = 1;
+let interval, currentTime, previousTime, setTime;
+
+function preload() {		// setup() 직전에 호출, 외부 파일의 로딩
+  clapSound = loadSound('data/claps.mp3');
+  catchSound = loadSound('data/catch.mp3');
+  cosmosImg = loadImage('data/cosmos.jpg');
+  targetImg = loadImage('data/circle1.png');
+}
+
+function setup() {
+  createCanvas(600, 600);
+  reset();				// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  image(cosmosImg, width/2, height/2, width, height);	// 배경 이미지 표시
+  
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  text('Stage: ' + stage + ', Number: ' + num + ', Score: ' + score, width/2, 30);
+
+  image(targetImg, targetX, targetY, targetSize, targetSize);	// 목표물 이미지 표시
+
+  timerProcess(); 			// 일정 시간마다 목표물 위치좌표 랜덤 변경
+  gamePause();				// 단계이동 또는 게임종료
+}
+
+function timerProcess() {			// 일정 시간마다 목표물 위치좌표 랜덤 변경
+  currentTime = millis();			// 현재시간 설정
+  interval = currentTime - previousTime; 	// 시간차(interval) = 현재시간 - 이전시간
+  if (interval > setTime) {			// setTime마다 처리
+    previousTime = millis();			// 이전시간을 현재시간으로 갱신
+    targetX = random(targetSize, width-targetSize);	// 목표물의 x축 좌표 랜덤 변경
+    targetY = random(targetSize, height-targetSize);	// 목표물의 x축 좌표 랜덤 변경
+    num++;					// 목표물 출현 횟수 증가
+  }
+}
+
+function gamePause() {		// 단계이동 또는 게임종료
+  if (num === 15) {		// 목표물의 출현 횟수가 15인 경우 게임 종료 및 초기화
+    fill(255);
+    text('GAME OVER', width/2, height/2);
+
+    stage = 1;			// 1단계
+    noLoop();			// draw() 함수의 반복 실행 일시 정지
+  }
+  if (score >= 10) {		// 점수가 최소 10점인 경우 단계 이동
+    clapSound.play();		// 효과음 재생
+    fill(255);
+    text('YOU WIN', width/2, height/2 - 30);
+    text('Hit the space key to start next stage', width/2, height/2 + 30);
+
+    stage++;			// 단계 증가
+    noLoop();			// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function mousePressed() {		// 이벤트함수: 마우스를 누르면 자동 실행
+  let distance = dist(targetX, targetY, mouseX, mouseY);	// 목표물∼마우스 거리
+  if (distance < targetSize/2) {		// 원형 내부에서 마우스를 누른 경우
+    catchSound.play();			// 효과음 재생
+    score++;				// 점수 상승
+  }
+}
+
+function keyPressed() {		// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {		// 스페이스 키를 누르면 게임 초기화, 재실행
+    reset();			// 게임 종료 시: 게임 초기화
+    loop();			// draw() 함수의 무한 반복 실행
+  }
+}
+
+function reset() {		// 게임 초기화
+  num = 0;			// 목표물 출현 횟수 초기화
+  score = 0;			// 점수 초기화
+  previousTime = 0;		// 이전시간 초기화
+
+  if (stage === 1) {		// 1단계인 경우
+    targetSize = 50;		// 목표물 크기 초기화
+    setTime = 1000;		// setTime 초기화
+  } else if (stage > 1 && stage !== previousStage) {		// 2단계 이상인 경우
+    targetSize -= 3;				// 목표물 크기 감소
+    if (targetSize < 30) targetSize = 30;	// 목표물 최소크기: 30
+    setTime -= 50;				// setTime: 50msec씩 감소
+    if (setTime < 500) setTime = 500;	// setTime 최소값: 500msec
+  }
+
+  previousStage = stage;			// 2단계 이상에서 동일 단계는 한 번만 처리
+  targetX = random(targetSize, width-targetSize);	// 목표물의 x축 좌표 랜덤 변경
+  targetY = random(targetSize, height-targetSize);	// 목표물의 y축 좌표 랜덤 변경
+  imageMode(CENTER);	// 이미지 정렬 모드: 이미지의 정가운데에서 폭/높이 설정
+}

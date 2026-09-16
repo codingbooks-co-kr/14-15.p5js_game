@@ -1,0 +1,48 @@
+// [본문 코드] 원형 객체 두 개가 좌우 반사하면서 상호 부딪힐 때 크기가 랜덤하게 변경
+
+let c1, c2;
+
+function setup() {
+  createCanvas(300, 300);
+  c1 = new Circle(color(255, 0, 0), 0, width/2, 30, 1);
+  c2 = new Circle(color(0, 255, 0), width, width/2, 30, 1);
+}
+
+function draw() {
+  background(0, 10);		// 페이딩 효과 (투명도 10 부여)
+  c1.display();
+  c1.move();
+  c1.hit(c2);			// 인수 c2는 Circle 객체
+  c2.display();
+  c2.move();
+  c2.hit(c1);			// 인수 c1은 Circle 객체
+}
+
+// [클래스 코드] 
+
+class Circle {				// 원형 클래스
+  constructor(c, x, y, d, speed) {	// 생성자: 속성 추가 및 초기화
+    this.c = c;				// 속성: 색상 초기화
+    this.x = x;				// 속성: x축 위치좌표 초기화
+    this.y = y;				// 속성: y축 위치좌표 초기화
+    this.d = d;				// 속성: 크기 초기화
+    this.speed = speed;		// 속성: 속도 초기화
+  }
+  display() {				// 메소드: 원형 표시
+    noStroke();				// 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(this.c);
+    ellipse(this.x, this.y, this.d, this.d);
+  }
+  move() {				// 메소드: 원형 이동 및 좌우 반사
+    this.x += this.speed;		// x축 속도 누적 → x축 거리 이동 (부호: 방향성)
+    if (this.x < 0 || this.x > width) {	// 캔버스의 x축 좌우 경계에서 충돌하는 경우
+      this.speed *= -1;		// 속도의 방향 반전, 즉 반사
+    }
+  }
+  hit(c) {				// 메소드: 두 원형 충돌 (→매개변수 c는 객체형)
+    let distance = dist(this.x, this.y, c.x, c.y);
+    if (distance < (this.d/2 + c.d/2)) {
+      this.d = random(30, 60);		// 크기를 랜덤 변경
+    }
+  }
+}

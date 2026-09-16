@@ -1,0 +1,20 @@
+// setInterval()과 clearInterval() 기반 시간 측정: 0.5초마다 원형 생성, 마우스 누르면 토글
+
+let myId, myToggle = false;
+
+function setup() {
+  createCanvas(300, 300);
+  myId = setInterval(timer, 500);		// 500msec마다 콜백함수인 timer() 호출
+  background(0);
+}
+
+function mousePressed() {				// 마우스 이벤트함수
+  if (myToggle) myId = setInterval(timer, 500);	// 500msec마다 timer() 호출
+  else clearInterval(myId);				// 타이머(myId) 취소
+  myToggle = !myToggle;				// 값 토글(true 또는 false)
+}
+
+function timer() {					// 콜백함수
+  fill(random(width), random(width), random(width), 200);
+  ellipse(random(width), random(height), 50, 50);
+}

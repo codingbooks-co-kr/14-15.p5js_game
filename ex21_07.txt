@@ -1,0 +1,127 @@
+// 완성: 방향키로 플레이어를 좌우 이동하여 목표물 7개를 맞추면 다음 단계로 이동, 목표물의 생성 주기 감소, 낙하하는 목표물이 캔버스 화면을 벗어나면 게임 종료, ‘r’키를 눌러 재시작
+
+let clapSound, burstSound, burstImg, cosmosImg, targetImg, playerImg, score;
+let y1, y2, targets, player, shoot, timer, previousStage, stage = 1;
+
+function preload() {		// setup() 직전에 호출, 외부 파일의 로딩
+  clapSound = loadSound('data/claps.mp3');
+  burstSound = loadSound('data/burst.mp3');
+  burstImg = loadImage('data/burst.png');
+  cosmosImg = loadImage('data/cosmos.jpg');
+  targetImg = loadImage('data/circle1.png');
+  playerImg = loadImage('data/rocket2.png');
+}
+
+function setup() {
+  createCanvas(500, 600);
+  reset();			// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  imageMode(CORNER);	// 이미지 정렬 모드: 이미지의 좌상단 모서리 기준 폭/높이 설정
+  image(cosmosImg, 0, y1, width, height); 	// 배경 이미지1 표시
+  image(cosmosImg, 0, y2, width, height); 	// 배경 이미지2 표시
+  y1 += 2;					// 배경 이미지1 아래로 이동
+  y2 += 2;					// 배경 이미지2 아래로 이동
+  if (y1 > height) y1 = -height;		// 이미지1: 캔버스를 벗어나면 y좌표 재설정
+  if (y2 > height) y2 = -height;		// 이미지2: 캔버스를 벗어나면 y좌표 재설정
+  
+  noStroke();				// 레이저 발사 시 외곽선 색상에 영향을 끼치지 않음
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  text('Stage: ' + stage + ', Score: ' + score, width/2, 30);		// 단계, 점수 표시
+
+  imageMode(CENTER);		// 이미지 정렬 모드: 이미지의 가운데에서 폭/높이 설정
+  playerControl();			// 플레이어 좌우 이동 제어 
+  targetProcess();			// 목표물 객체의 생성, 추가, 표시, 이동, 게임 종료
+  shooting();				// 슈팅 후 목표물 맞추면 점수 상승, 단계 이동
+}
+
+function playerControl() {		// 플레이어 좌우 이동 제어 
+  image(playerImg, player.x, player.y, player.size, player.size);	   // 플레이어 이미지 표시
+
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    player.x -= player.speed;		// x축 속도(-부호: 왼쪽) 누적 → 왼쪽 이동 
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    player.x += player.speed;		// x축 속도(+부호: 오른쪽) 누적 → 오른쪽 이동 
+  }
+  player.x = constrain(player.x, 0, width);	// 플레이어 좌우 이동 제한
+}
+
+function targetProcess() {		// 목표물 객체의 생성, 추가, 표시, 이동, 게임 종료
+  if (frameCount % timer === 0) {	// timer 주기로 목표물 객체 생성
+    let target = { x: random(width), y: 0, size: random(20, 40), speed: random(1, 2) };
+    targets.push(target);		// 생성된 target 객체를 targets 배열에 추가
+  }
+
+  for (let i = targets.length-1; i >= 0; i--) {		// 목표물 객체별 역순 반복 처리
+    image(targetImg, targets[i].x, targets[i].y, targets[i].size, targets[i].size);
+
+    targets[i].y += targets[i].speed;	// 목표물의 y축 속도 누적 → 아래쪽 이동
+    if (targets[i].y > height) {		// 목표물이 캔버스 바닥을 벗어난 경우
+      fill(255);
+      text('Game Over', width/2, height/2);
+
+      stage = 1;			// 1단계
+      noLoop();				// draw() 함수의 반복 실행 일시 정지
+    }
+  }
+}
+
+function shooting() {			// 슈팅 후 목표물 맞추면 점수 상승, 단계 이동
+  if (shoot) {				// shoot = true일 때 레이저빔 발사
+    let laser = player.x;		// 레이저빔 발사 시 x축 좌표
+    shoot = false;			// draw()의 반복 처리 시 레이저빔은 한 번만 발사 
+
+    stroke(255, 0, 0);
+    strokeWeight(3);
+    line(laser, player.y, laser, 0);	// 레이저빔 표시
+    
+    for (let i = targets.length-1; i >= 0; i--) {		// 목표물 객체별 역순 반복 처리
+      if (laser > (targets[i].x - targets[i].size/2) && laser < (targets[i].x + targets[i].size/2)) {
+        burstSound.play();		// 효과음 재생
+        image(burstImg, targets[i].x, targets[i].y, targets[i].size*2, targets[i].size*2);
+        targets.splice(i, 1);		// targets[i] 요소 제거
+        score++;			// 점수 증가
+      }
+    }
+
+    if (score >= 7) {			// 목표물 최소 7개 맞추면 단계 이동
+      clapSound.play();			// 효과음 재생
+      noStroke();
+      fill(255);
+      text('YOU WIN', width/2, height/2 - 30);
+      text('Hit the r key to start next stage', width/2, height/2 + 30);
+
+      stage++;				// 단계 증가
+      noLoop();				// draw() 함수의 반복 실행 일시 정지
+    }
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') shoot = true;	// 스페이스 키를 누르면 레이저빔 한 번 발사
+  if (key === 'r') {			// 'r' 키를 누르면 게임 초기화
+    reset();				// 게임 종료 시: 게임 초기화
+    loop();				// draw() 함수의 무한 반복 실행
+  }
+}
+
+function reset() {			// 게임 초기화
+  y1 = 0;				// 배경 이미지1 y좌표 초기화
+  y2 = -height;			// 배경 이미지2 y좌표 초기화
+  targets = [];				// 목표물 객체: 빈 배열로 초기화
+  player = { x: width/2, y: height-30, size: 30, speed: 3 };	  // 플레이어 객체 초기화
+  shoot = false;			// draw()의 반복 처리 시 레이저빔은 한 번만 발사 
+  score = 0;				// 점수 초기화
+
+  if (stage === 1) {			// 1단계인 경우
+    timer = 60;			// 목표물 생성 타이머 초기화
+  } else if (stage > 1 && stage !== previousStage) {		// 2단계 이상인 경우
+    timer -= 5;			// 목표물 생성 타이머 감소 → 목표물이 더 빨리 생성
+    if (timer < 20) timer = 20;		// 목표물 생성 타이머 최소값: 20
+  }
+  previousStage = stage;		// 2단계 이상에서 동일 단계는 한 번만 처리
+}

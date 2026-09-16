@@ -1,0 +1,31 @@
+// 1단계: 좌→우로 랜덤 포물선 이동하는 목표물
+
+let targetX, targetY, speedX, speedY, targetSize = 50, gravity = 0.5;
+
+function setup() {
+  createCanvas(600, 600);
+  start();			// 목표물의 포물선 이동 초기화
+}
+
+function draw() {
+  background(0, 10);		// 페이딩 효과 (투명도 10 부여)
+  
+  noStroke();			// 부드러운 페이딩 효과를 위해 이동체의 외곽선 제거
+  fill(0, 255, 0);
+  ellipse(targetX, targetY, targetSize, targetSize);	// 목표물 표시
+
+  targetX += speedX; 		// x축 속도 누적 → x축 거리 이동
+  speedY += gravity; 		// y축 속도에 중력 누적 → 낙하 시 가속
+  targetY += speedY; 		// y축 속도 누적 → y축 거리 이동
+
+  if (targetX > width || targetY > height) {	// 목표물이 캔버스 경계를 벗어난 경우
+    start();					// 목표물의 포물선 이동 초기화
+  }
+}
+
+function start() {			// 목표물의 포물선 이동 초기화
+  targetX = random(-100, 0);		// 목표물의 x축 좌표 초기화(랜덤 설정)
+  targetY = height;			// 목표물의 y축 좌표 초기화
+  speedX = random(5, 10);		// 목표물의 x축 속도(+부호:오른쪽 방향성) 초기화
+  speedY = random(-25, -10);		// 목표물의 y축 속도(-부호:위쪽 방향성) 초기화
+}

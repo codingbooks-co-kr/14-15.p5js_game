@@ -1,0 +1,63 @@
+// [본문 코드] 원형 객체 좌우 반사, 사각형 객체 상하 반사
+
+let c, s;
+
+function setup() {
+  createCanvas(300, 300);
+  c = new Circle(color(255), width/2, 100, 30, 3);
+  s = new Square(color(255), width/2, 200, 30, -3);
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+  c.display();				// 메소드 호출: 원형 그리기 동작
+  c.move();				// 메소드 호출: 원형 좌우 이동 및 반사
+  s.display();				// 메소드 호출: 사각형 그리기 동작
+  s.move();				// 메소드 호출: 사각형 상하 이동 및 반사
+}
+
+// [클래스 코드]
+
+class Shape {				// 상위 클래스(Shape)
+  constructor(c, x, y, d, speed) {	// 상위 생성자
+    this.c = c;				// 속성: 색상 초기화
+    this.x = x;				// 속성: x축 위치좌표 초기화
+    this.y = y;				// 속성: y축 위치좌표 초기화
+    this.d = d;				// 속성: 크기 초기화
+    this.speed = speed;		// 속성: 속도 초기화
+  }
+  move() {				// ❶ 상위 메소드: 좌우 이동 및 반사
+    this.x += this.speed;		// x축 속도 누적 → x축 거리 이동 (부호: 방향성)
+    if (this.x < 0 || this.x > width) {	// 캔버스의 좌우 경계에서 충돌하는 경우
+      this.speed *= -1;		// 속도의 방향 반전, 즉 반사
+    }
+  }
+}
+
+class Circle extends Shape {		// 하위 클래스(Circle)로서 상위 클래스(Shape) 상속
+  constructor(c, x, y, d, speed) {	// 하위 생성자 (→생략 가능)
+    super(c, x, y, d, speed);		// 상위 생성자 호출
+  }
+  display() {				// 하위 메소드: 원형 그리기 동작
+    noStroke();				// 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(this.c);
+    ellipse(this.x, this.y, this.d, this.d);
+  }
+}
+
+class Square extends Shape {		// 하위 클래스(Square)로서 상위 클래스(Shape) 상속
+  constructor(c, x, y, d, speed) {	// 하위 생성자 (→생략 가능)
+    super(c, x, y, d, speed);		// 상위 생성자 호출
+  }
+  display() {				// 하위 메소드: 사각형 그리기 동작
+    noStroke();				// 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(this.c);
+    rect(this.x, this.y, this.d, this.d);
+  }
+  move() {				// ❷ 메소드 오버라이딩: 상하 이동 및 반사
+    this.y += this.speed;		// y축 속도 누적 → y축 거리 이동 (부호: 방향성)
+    if (this.y < 0 || this.y > height) {	// 캔버스의 상하 경계에서 충돌하는 경우
+      this.speed *= -1;		// 속도의 방향 반전, 즉 반사
+    }
+  }
+}

@@ -1,0 +1,65 @@
+// [본문 코드] 원, 사각형 객체 배열 좌우 반사-1 (다형성을 배열에 적용)
+
+let sh = [];				// 변수 선언 및 빈 배열 생성
+
+function setup() {
+  createCanvas(500, 500);
+  for (let i = 0; i < 12; i++) {		// 12개의 객체 생성 및 배열에 추가
+    if (i < 6) {				// 12개 중 6개는 Circle 객체 생성
+      sh[i] = new Circle(255, random(width), random(height), random(20, 50), random(-5, 5));
+    } else {				// 나머지 6개는 Square 객체 생성
+      sh[i] = new Square(255, random(width), random(height), random(20, 50), random(-5, 5));
+    }
+  }
+}
+
+function draw() {
+  background(0);
+  for (let i = 0; i < sh.length; i++) {
+    sh[i].display();      		// 오버라이딩
+    sh[i].move();      			// 상속
+  }
+}
+
+// [클래스 코드] 
+
+class Shape {				// 상위 클래스(Shape) 
+  constructor(c, x, y, d, speed) {	// 상위 생성자: 속성 추가 및 초기화
+    this.c = c;				// 속성: 색상 초기화
+    this.x = x;				// 속성: x축 위치좌표 초기화
+    this.y = y;				// 속성: y축 위치좌표 초기화
+    this.d = d;				// 속성: 크기 초기화
+    this.speed = speed;		// 속성: 속도 초기화
+  }
+  display() {				// 상위 메소드: 문자열 출력
+    fill(this.c, this.c, 0);
+    textSize(this.d);
+    text("Shape", this.x, this.y);
+  }
+  move() {				// 상위 메소드: 좌우 이동 및 반사
+    this.x += this.speed;		// x축 속도 누적 → x축 거리 이동 (부호: 방향성)
+    if (this.x < 0 || this.x > width) {	// 캔버스의 좌우 경계에서 충돌하는 경우
+      this.speed *= -1;		// 속도의 방향 반전, 즉 반사
+    }
+  }
+}
+
+class Circle extends Shape {		// 하위 클래스(Circle): 상위 클래스(Shape) 상속
+  constructor(c, x, y, d, speed) {	// 하위 생성자
+    super(c, x, y, d, speed);		// 상위 생성자 호출
+  }
+  display() {				// 메소드 오버라이딩
+    fill(this.c, 0, 0);
+    ellipse(this.x, this.y, this.d, this.d);
+  }
+}
+
+class Square extends Shape {		// 하위 클래스(Square): 상위 클래스(Shape) 상속
+  constructor(c, x, y, d, speed) {	// 하위 생성자
+    super(c, x, y, d, speed);		// 상위 생성자 호출
+  }
+  display() {				// 메소드 오버라이딩
+    fill(0, this.c, 0);
+    rect(this.x, this.y, this.d, this.d);
+  }
+}

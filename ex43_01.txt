@@ -1,0 +1,45 @@
+// 1단계: 캔버스 하단에서 랜덤 타이밍에 적 객체 생성 후 왼쪽으로 이동
+
+let enemies = [];
+
+function setup() {
+  createCanvas(700, 300);
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과 (투명도 10 부여)
+
+  if (random(1) < 0.01) {		// 매 프레임 1%의 확률로 적 객체 생성 
+    let enemy = new Enemy();	// 적 객체 생성 및 초기화
+    enemies.push(enemy);		// enemies 배열 끝에 enemy 객체 추가
+  }
+
+  for (let i = enemies.length-1; i >= 0; i--) {		// 역순 반복 처리: [참고20.1] 참조
+    enemies[i].display();		// 적 객체 표시
+    enemies[i].move();			// 적 객체 이동
+    if (enemies[i].offCanvas()) {	// 적 객체가 캔버스에서 사라지면 배열에서 제거
+      enemies.splice(i, 1); 		// enemies[i]를 배열에서 삭제
+    }
+  }
+}
+
+class Enemy {				// 적 클래스
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.size = 40;			// 적 크기 초기화
+    this.x = width;			// 적 x좌표 초기화
+    this.y = height - this.size/2;	// 적 y좌표 초기화
+    this.speed = random(5, 10);	// 적 속도 초기화(랜덤)
+  }
+  display() {				// 메소드: 적 객체 표시
+    noStroke();				// 페이딩 효과를 위해 이동체의 외곽선 제거
+    fill(255, 0, 0);
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+  move() {				// 메소드: 적 객체 이동
+    this.x -= this.speed;		// 적이 왼쪽으로 이동
+  }
+  offCanvas() {				// 메소드: 적이 왼쪽으로 완전히 사라졌는지 판단
+    if (this.x < -this.size) return true;	// 적이 캔버스의 왼쪽 경계를 벗어나면 true 반환
+    else return false;			// 적이 캔버스상에서 이동 중인 경우 false 반환
+  }
+}

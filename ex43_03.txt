@@ -1,0 +1,46 @@
+// 3단계: 캔버스 중간단에서는 랜덤 길이의 플랫폼을 1초마다 생성 후 왼쪽으로 이동
+
+let platforms = [];
+
+function setup() {
+  createCanvas(700, 300);
+}
+
+function draw() {
+  background(0);
+
+  if (frameCount % 60 === 0) {		// 1초마다 플랫폼 객체 생성 
+    let platform = new Platform();		// 플랫폼 객체 생성 및 초기화
+    platforms.push(platform); 			// platforms 배열 끝에 platform 객체 추가
+  }
+
+  for (let i = platforms.length-1; i >= 0; i--) {	// 역순 반복 처리: [참고20.1] 참조
+    platforms[i].display();		// 플랫폼 객체 표시
+    platforms[i].move();			// 플랫폼 객체 이동
+    if (platforms[i].offCanvas()) {	// 플랫폼이 캔버스에서 사라지면 배열에서 제거
+      platforms.splice(i, 1); 		// platforms[i]를 배열에서 삭제
+    }
+  }
+}
+
+class Platform {			// 플랫폼 클래스
+  constructor(x, y, w, h) {		// 생성자: 속성 추가 및 초기화
+    this.x = width;			// 플랫폼 x좌표 초기화
+    this.y = 200;			// 플랫폼 x좌표 초기화
+    this.w = random(50, 250);		// 플랫폼 폭 초기화(랜덤)
+    this.h = 20;			// 플랫폼 높이 초기화
+    this.speed = 5;			// 플랫폼 속도 초기화
+  }
+  display() {				// 메소드: 플랫폼 객체 표시
+    noStroke();
+    fill(255, 200);
+    rect(this.x, this.y, this.w, this.h);
+  }
+  move() {				// 메소드: 플랫폼 객체 이동
+    this.x -= this.speed;		// 플랫폼이 왼쪽으로 이동
+  }
+  offCanvas() {				// 메소드: 플랫폼이 왼쪽으로 완전히 사라졌는지 판단
+    if (this.x < -this.w) return true;	// 플랫폼이 캔버스의 왼쪽 경계를 벗어나면 true 반환
+    else return false;			// 플랫폼이 캔버스상에서 이동 중인 경우 false 반환
+  }
+}

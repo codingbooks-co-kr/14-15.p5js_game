@@ -1,0 +1,44 @@
+// 1단계: 5개의 직사각형 플랫폼 랜덤 생성, 스페이스 키를 누르면 초기화
+
+let platforms, platformNum = 5;
+
+function setup() {
+  createCanvas(600, 600);
+  reset();				// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  background(0);
+  for (let i = 0; i < platforms.length; i++) {
+    platforms[i].display();		// 플랫폼 객체 표시
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') reset();		// 스페이스 키를 누르면 게임 초기화
+}
+
+function reset() {			// 게임 초기화
+  platforms = [];			// 플랫폼: 빈 객체 배열로 초기화
+  for (let i = 0; i < platformNum; i++) {
+    let w = random(100, 400);		// 플랫폼 폭(랜덤)
+    let h = 20;				// 플랫폼 높이 
+    let x = random(width - w);	// 플랫폼 x좌표(랜덤)
+    let y = map(i, -0.5, platformNum-0.5, 0, height-h);	// 플랫폼 y좌표 
+    platforms[i] = new Platform(x, y, w, h);			// 플랫폼 객체생성, 초기화
+  }
+}
+
+class Platform {			// 플랫폼 클래스 
+  constructor(x, y, w, h) {		// 생성자: 속성 추가 및 초기화
+    this.x = x;				// 플랫폼 x좌표 초기화
+    this.y = y;				// 플랫폼 y좌표 초기화
+    this.w = w;			// 플랫폼 폭 초기화
+    this.h = h;				// 플랫폼 높이 초기화
+  }
+  display() {				// 메소드: 플랫폼 객체 표시
+    noStroke();
+    fill(255, 255, 0, 200);
+    rect(this.x, this.y, this.w, this.h);
+  }
+}

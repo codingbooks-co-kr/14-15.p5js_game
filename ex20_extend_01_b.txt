@@ -1,0 +1,38 @@
+// 10개의 이동체 (객체 리터럴 사용)
+// 1개의 배열변수 필요
+
+let num = 10;		// 이동체 수
+let targets = [];		// 빈 객체 배열
+
+function setup() {
+  createCanvas(600, 500);
+  for (let i = 0; i < num; i++) {
+    let target = { x: 0, 
+                 y: random(height), 
+                 size: random(20, 50), 
+                 speed: random(2, 7) };
+    targets.push(target);
+  }
+}
+
+function draw() {
+  background(0, 10);	// 페이딩 효과
+
+  for (let i = 0; i < num; i++) {
+    noStroke();
+    fill(255, 200);
+    ellipse(targets[i].x, targets[i].y, 
+          targets[i].size, targets[i].size);
+
+    // 오른쪽으로 이동
+    targets[i].x += targets[i].speed;
+
+    // 오른쪽 경계를 넘어서면 다시 시작
+    if (targets[i].x > width) {
+      targets[i].x = 0;
+      targets[i].y = random(height);
+      targets[i].size = random(20, 50);
+      targets[i].speed = random(2, 7);
+    }
+  }
+}

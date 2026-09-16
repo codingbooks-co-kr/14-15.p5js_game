@@ -1,0 +1,146 @@
+// 완성: 제한시간 안에 방향키로 플레이어를 점프, 좌우 이동하면서 모든 목표물을 획득하면 다음 단계로 이동하고 목표물 개수 증가, 제한시간을 초과하면 게임 종료, 스페이스 키를 누르면 재시작
+
+let catchSound, clapSound, cosmosImg, burstImg, targetImg, playerImg, timer;
+let player, targets, targetNum, previousStage, stage = 1;
+
+function preload() {			// setup() 직전에 호출, 외부 파일의 로딩
+  catchSound = loadSound('data/catch.mp3');
+  clapSound = loadSound('data/claps.mp3');
+  cosmosImg = loadImage('data/cosmos.jpg');
+  burstImg = loadImage('data/burst.png');
+  targetImg = loadImage('data/circle1.png');
+  playerImg = loadImage('data/rocket2.png');
+}
+
+function setup() {
+  createCanvas(600, 400);
+  reset();				// 실행 초기: 게임 초기화
+}
+
+function draw() {
+  image(cosmosImg, width/2, height/2, width, height);	// 배경 이미지 표시
+  
+  fill(255);
+  text('Stage: ' + stage, width/2, 60);	// 단계 표시
+
+  noStroke();
+  fill(255, 0, 0);
+  rect(0, 0, timer, 20);			// 막대형 타이머 표시
+
+  timer--;				// 타이머 감소
+  if (timer <= 0) {			// 타이머 종료
+    fill(255);
+    text('GAME OVER', width/2, height/2);
+
+    stage = 1;				// 1단계
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+  
+  player.display();			// 플레이어 객체 표시
+  player.update();			// 플레이어 객체 갱신
+  
+  if (keyIsDown(LEFT_ARROW)) {	// 왼쪽 방향키를 누른 경우
+    player.move(-1);			// 플레이어 객체 왼쪽 이동
+  }
+  if (keyIsDown(RIGHT_ARROW)) {	// 오른쪽 방향키를 누른 경우
+    player.move(1);			// 플레이어 객체 오른쪽 이동
+  }
+  if (keyIsDown(UP_ARROW)) {	// 위쪽 방향키를 누른 경우
+    player.jump();			// 플레이어 객체 제자리 점프
+  }
+  
+  for (let i = targets.length-1; i >= 0; i--) {		// 역순 반복 처리: [참고20.1] 참조
+    targets[i].display();			// 목표물 객체 표시
+    if (player.hit(targets[i])) {		// 플레이어∼목표물 충돌한 경우
+      targets[i].catchTarget();		// 목표물 폭발하는 효과 표시
+      targets.splice(i, 1);  		// targets[i]를 배열에서 삭제
+    }
+  }
+
+  if (targets.length === 0) {		// 모든 목표물이 소멸된 경우 다음 단계로 이동
+    clapSound.play();			// 효과음 재생
+    fill(255);
+    text('YOU WIN', width/2, height/2 - 30);
+    text('Hit the space key to start next stage', width/2, height/2 + 30);
+
+    stage++;				// 단계 상승
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {			// 스페이스 키를 누르면 게임 초기화, 재실행
+    reset();				// 게임 종료 시: 게임 초기화
+    loop();				// draw() 함수의 무한 반복 실행
+  }
+}
+
+function reset() {			// 게임 초기화
+  if (stage === 1) {			// 1단계인 경우
+    targetNum = 5;			// 목표물 개수 초기화
+  } else if (stage > 1 && stage !== previousStage) {		// 2단계 이상인 경우
+    targetNum++;			// 목표물 개수 증가
+  }
+  previousStage = stage;		// 2단계 이상에서 동일 단계는 한 번만 처리
+
+  timer = width;			// 타이머 초기화
+  player = new Player();		// 플레이어 객체 생성 및 초기화
+  targets = [];				// 목표물: 빈 객체 배열로 초기화
+  for (let i = 0; i < targetNum; i++) {
+    targets[i] = new Target();		// 목표물 객체 생성 및 초기화
+  }
+
+  textSize(30);
+  textAlign(CENTER, CENTER);		// 문자열 가운데 정렬
+  imageMode(CENTER);		// 이미지 정렬 모드: 이미지의 가운데에서 폭/높이 설정
+}
+
+class Target {				// 목표물 클래스
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.size = 30;			// 목표물 크기 초기화
+    this.x = random(this.size/2, width-this.size/2);	// 목표물 x좌표 초기화(랜덤)
+    this.y = random(this.size/2, height-this.size/2);	// 목표물 y좌표 초기화(랜덤)
+  }
+  display() {				// 메소드: 목표물 객체 표시
+    image(targetImg, this.x, this.y, this.size, this.size);	// 목표물 이미지 표시
+  }
+  catchTarget() {			// 메소드: 목표물 폭발 효과
+    catchSound.play();			// 효과음 재생
+    image(burstImg, this.x, this.y, this.size*2, this.size*2);	// 폭발 이미지 표시
+  }
+}
+
+class Player {				// 플레이어 클래스 
+  constructor() {			// 생성자: 속성 추가 및 초기화
+    this.x = width / 2;			// 플레이어 x축 좌표 초기화
+    this.y = height / 2;		// 플레이어 y축 좌표 초기화
+    this.size = 40;			// 플레이어 크기 초기화
+    this.speedX = 5;			// 플레이어 x축 속도 초기화
+    this.speedY = 0;			// 플레이어 y축 속도 초기화
+    this.gravity = 0.2;			// 플레이어 중력가속도 초기화
+    this.jumpPower = -6;		// 플레이어 점프파워 초기화
+  }
+  display() {				// 메소드: 플레이어 객체 표시
+    image(playerImg, this.x, this.y, this.size, this.size);	// 플레이어 이미지 표시
+  }
+  update() {				// 메소드: 플레이어 객체 업데이트
+    this.speedY += this.gravity;	// y축 속도에 중력 누적 → y축 가속
+    this.y += this.speedY;		// y축 속도 누적 → y축 거리 이동
+    if (this.y > height - this.size/2) {	// 낙하 후 캔버스 바닥에 닿은 경우
+      this.y = height - this.size/2;	// y축 좌표는 캔버스 바닥상에 위치
+      this.speedY = 0;			// 속도에 중력가속도가 누적되지 않도록 0으로 초기화
+    }
+  }
+  move(turn) {				// 메소드: 플레이어 객체 이동
+    this.x += this.speedX * turn;	// x축 속도 누적 → x축 거리 이동 (turn: 방향성)
+    this.x = constrain(this.x, this.size/2, width - this.size/2);		// x축 이동 제한
+  }
+  jump() {				// 메소드: 플레이어 객체 점프
+    this.speedY = this.jumpPower;	// y축 속도는 –6(점프파워) → 위쪽으로 점프
+  }
+  hit(other) {				// 메소드: 플레이어∼목표물 충돌 여부 판단
+    let distance = dist(this.x, this.y, other.x, other.y);		// 플레이어∼목표물 거리
+    if (distance < (this.size + other.size) / 2) return true;	// 충돌
+    else return false;						// 미충돌
+  }
+}

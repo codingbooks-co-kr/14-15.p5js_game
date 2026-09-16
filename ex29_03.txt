@@ -1,0 +1,30 @@
+// 3단계: 제한시간을 사각형 진행바로 표시
+
+let timer;
+
+function setup() {
+  createCanvas(500, 200);
+  timer = width;			// 타이머 초기화
+}
+
+function draw() {
+  background(0);
+  fill(255, 0, 0);
+  rect(0, 0, timer, 50);			// 막대형 타이머 표시
+
+  timer--;				// 타이머 감소
+  if (timer <= 0) {			// 타이머 종료
+    fill(255);
+    textSize(30);
+    textAlign(CENTER, CENTER);	// 문자열 가운데 정렬
+    text('GAME OVER', width/2, height/2);
+    noLoop();				// draw() 함수의 반복 실행 일시 정지
+  }
+}
+
+function keyPressed() {			// 이벤트함수: 자판키를 누르면 한 번 실행
+  if (key === ' ') {			// 스페이스 키를 눌러 타이머 초기화, draw() 재반복
+    timer = width;			// 타이머 초기화
+    loop();				// draw() 함수의 무한 반복 실행
+  }
+}

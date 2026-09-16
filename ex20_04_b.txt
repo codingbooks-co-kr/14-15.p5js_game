@@ -1,0 +1,18 @@
+function setup() {
+  let arr = [10, 20, 30, 40];
+  let result = arr.splice(2); 	// array[2]부터 끝까지 제거
+  console.log(arr);		// 원본 배열은 변경됨
+  console.log(result);		// 제거된 배열요소 반환
+
+  arr = [10, 20, 30, 40];
+  arr.splice(1, 2); 	    	// arr[1]부터 두 개 요소 제거
+  console.log(arr);	   	// [10, 40]
+
+  arr = [10, 20, 30, 40];
+  arr.splice(1, 1, 50);  	   	// arr[1] 제거, 50으로 대체
+  console.log(arr);	   	// [10, 50, 30, 40]
+  
+  arr = [10, 20, 30, 40];
+  arr.splice(1, 0, 100);     	// arr[1]에 요소값 100 추가
+  console.log(arr);	    	// [10, 100, 20, 30, 40]
+}

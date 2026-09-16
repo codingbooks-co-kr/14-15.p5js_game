@@ -1,0 +1,24 @@
+// 1단계: 1초마다 랜덤하게 목표물 위치 변경
+
+let targetX, targetY, targetSize = 50;
+let interval, currentTime, previousTime = 0, setTime = 1000;
+
+function setup() {
+  createCanvas(300, 300);
+  targetX = random(targetSize, width-targetSize);	// 목표물의 x축 좌표 랜덤 변경
+  targetY = random(targetSize, height-targetSize);	// 목표물의 y축 좌표 랜덤 변경
+}
+
+function draw() {
+  background(0);
+  fill(255);
+  ellipse(targetX, targetY, targetSize, targetSize);	// 목표물 표시
+
+  currentTime = millis();			// 현재시간 설정
+  interval = currentTime - previousTime; 	// 시간차(interval) = 현재시간 - 이전시간
+  if (interval > setTime) {			// setTime(=1000msec) 마다 처리
+    previousTime = millis();			// 이전시간을 현재시간으로 갱신
+    targetX = random(targetSize, width-targetSize);	// 목표물의 x축 좌표 랜덤 변경
+    targetY = random(targetSize, height-targetSize);	// 목표물의 y축 좌표 랜덤 변경
+  }
+}

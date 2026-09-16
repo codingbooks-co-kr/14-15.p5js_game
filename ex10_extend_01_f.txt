@@ -1,0 +1,12 @@
+// setInterval() 기반 시간 측정: 0.5초마다 원형 생성
+
+function setup() {
+  createCanvas(300, 300);
+  setInterval(timer, 500);		// 500msec마다 콜백함수인 timer() 호출
+  background(0);
+}
+
+function timer() {			// 콜백함수
+  fill(random(width), random(width), random(width), 200);
+  ellipse(random(width), random(height), 50, 50);
+}
